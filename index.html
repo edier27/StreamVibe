@@ -2176,11 +2176,24 @@ function initFirebase() {
         if(fbContent.length > 0){
           window.allContent = fbContent;
           window.filtered   = fbContent.slice();
-          allContent = fbContent; // sync local variable too
-          filtered   = fbContent.slice();
-          if(typeof renderCarousels === 'function') renderCarousels();
-          if(typeof renderGrid === 'function' && window._currentPage === 'catalog') renderGrid();
-          console.log('[StreamVibe] Catálogo actualizado con '+fbContent.length+' títulos de Firebase');
+          // Actualizar TODAS las referencias al contenido
+          window.allContent = fbContent;
+          allContent = fbContent;
+          filtered = fbContent.slice();
+          console.log('[StreamVibe] ✅ '+fbContent.length+' títulos cargados de Firebase');
+
+          // Re-renderizar la página activa
+          var pg = window._currentPage || 'landing';
+          if(pg === 'landing' && typeof renderCarousels === 'function'){
+            renderCarousels();
+          } else if(pg === 'catalog'){
+            if(typeof applyFilters === 'function') applyFilters();
+            else if(typeof renderGrid === 'function') renderGrid();
+          }
+          // Siempre actualizar carruseles de landing si existen
+          setTimeout(function(){
+            if(typeof renderCarousels === 'function') renderCarousels();
+          }, 100);
           console.log('[StreamVibe] '+fbContent.length+' títulos cargados desde Firebase');
         }
       }
@@ -2362,7 +2375,7 @@ var allContent = [
   {id:18,title:'La Última Sinfonía',genre:'Drama',type:'Película',year:2023,rating:9.0,badge:'PRO',desc:'Un compositor sordo intenta crear su obra maestra antes de perder completamente el oído.',emoji:'🎵',bg1:'#05001a',bg2:'#0e003a',duration:'2h 01m'},
 ];
 
-var filtered = allContent.slice();
+var filtered = window.allContent.slice();
 var currentView = 'grid';
 var currentSort = 'relevance';
 var currentGenre = '';
