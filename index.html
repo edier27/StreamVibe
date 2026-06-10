@@ -3141,21 +3141,10 @@ var auth = null;
 var db   = null;
 
 function initFirebase(){
-  if(typeof firebase === 'undefined'){ setTimeout(initFirebase, 300); return; }
-  try{
-    var app = firebase.apps.length ? firebase.app() : 
-    auth = app.auth();
-    db   = app.firestore();
-    // Persistencia de sesión
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-    // Observar cambios de auth
-    auth.onAuthStateChanged(onAuthStateChanged);
-    console.log('[StreamVibe] Firebase Auth listo');
-  }catch(e){
-    console.error('[StreamVibe] Firebase error:', e);
-    showToast('⚠️ Firebase no configurado — modo demo activo','warning');
-    enableDemoMode();
-  }
+  // Usar Firebase ya inicializado por el SPA router
+  if(window._auth){ auth = window._auth; window.auth = window._auth; }
+  if(window._db)  { db   = window._db;   window.db   = window._db; }
+  console.log('[StreamVibe Auth] Firebase vinculado desde SPA router');
 }
 
 function onAuthStateChanged(user){
