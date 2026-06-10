@@ -940,8 +940,8 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
       </h1>
       <p class="hero-sub">Miles de películas, series y canales en vivo. Gratis con publicidad o sin interrupciones con Premium. Empieza hoy.</p>
       <div class="hero-actions">
-        <button class="btn-hero" onclick="openModal('register')">▶ Empezar gratis</button>
-        <button class="btn-hero-ghost" onclick="openModal('login')">Ver planes</button>
+        <button class="btn-hero" onclick="navigate('auth','register')">▶ Empezar gratis</button>
+        <button class="btn-hero-ghost" onclick="navigate('payments')">Ver planes</button>
       </div>
       <div class="hero-stats">
         <div class="stat-item">
@@ -1068,7 +1068,7 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
           <li>Con publicidad</li>
           <li>1 pantalla a la vez</li>
         </ul>
-        <button class="plan-btn plan-btn-free" onclick="openModal('register')">Empezar gratis</button>
+        <button class="plan-btn plan-btn-free" onclick="navigate('auth','register')">Empezar gratis</button>
       </div>
       <!-- Pro -->
       <div class="plan featured-plan">
@@ -1083,7 +1083,7 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
           <li>2 pantallas simultáneas</li>
           <li>Descargas offline</li>
         </ul>
-        <button class="plan-btn plan-btn-pro" onclick="openModal('register')">Suscribirse por $8.99</button>
+        <button class="plan-btn plan-btn-pro" onclick="navigate('auth','register')">Suscribirse por $8.99</button>
       </div>
       <!-- Premium -->
       <div class="plan">
@@ -1097,7 +1097,7 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
           <li>Contenido exclusivo</li>
           <li>Acceso anticipado</li>
         </ul>
-        <button class="plan-btn plan-btn-prem" onclick="openModal('register')">Suscribirse por $14.99</button>
+        <button class="plan-btn plan-btn-prem" onclick="navigate('auth','register')">Suscribirse por $14.99</button>
       </div>
     </div>
   </div>
@@ -1978,13 +1978,14 @@ function goBack() {
 // ── PAGE INITS ────────────────────────────────────
 
 function initLanding() {
+  // Mostrar la landing siempre — sin redirigir por auth
   if (typeof renderCarousels === 'function') renderCarousels();
-  // Si Firebase tarda, refrescar en 2 segundos
+  // Refrescar cuando Firebase cargue el contenido real
   setTimeout(function(){
     if(window.allContent && window.allContent.length > 0 && typeof renderCarousels === 'function'){
       renderCarousels();
     }
-  }, 2000);
+  }, 3000);
 }
 
 function initCatalog(genre) {
@@ -2118,11 +2119,11 @@ function initFirebase() {
           window._userPlan = 'free';
         }
 
-        // If on auth page show profile, if on landing stay on landing
+        // Solo mostrar perfil si el usuario está EN la página de auth
         if (_currentPage === 'auth' && typeof showProfile === 'function') {
           showProfile(user);
         }
-        // If on landing and just logged in, stay on landing (don't redirect)
+        // En landing y otras páginas: NO redirigir, solo actualizar el nav
 
       } else {
         // Logged out
