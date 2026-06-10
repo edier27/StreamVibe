@@ -1306,27 +1306,21 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
     <div class="player-title" id="player-title">Reproduciendo...</div>
     <button class="player-close" onclick="closePlayer()">✕</button>
   </div>
-  <div class="player-wrap">
-    <div class="player-screen">
-      <div class="player-emoji" id="player-emoji">🎬</div>
-      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;" id="player-movie-title">—</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.5);">Streaming en 1080p • Dolby Audio</div>
+  <div class="player-wrap" style="position:relative;width:100%;background:#000;flex:1;display:flex;align-items:center;justify-content:center;">
+    <!-- Poster / logo mientras carga -->
+    <div id="modal-poster" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#000;z-index:2;">
+      <img id="modal-logo" src="" style="width:80px;height:80px;border-radius:12px;object-fit:cover;display:none;" onerror="this.style.display='none'">
+      <div id="player-emoji" style="font-size:64px;"></div>
+      <div id="player-movie-title" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#fff;text-align:center;padding:0 20px;"></div>
+      <div id="modal-status" style="font-size:13px;color:rgba(255,255,255,0.5);">⏳ Conectando stream...</div>
     </div>
+    <!-- Video real -->
+    <video id="modal-video" style="width:100%;max-height:70vh;background:#000;display:block;" controls playsinline></video>
   </div>
-  <div class="player-controls">
-    <div class="progress-bar" onclick="seekVideo(event)">
-      <div class="progress-fill" id="progress-fill"></div>
-    </div>
-    <div class="ctrl-row">
-      <button class="ctrl-btn" onclick="togglePlay()" id="play-btn">⏸</button>
-      <button class="ctrl-btn" onclick="skipVideo(-10)">⏪</button>
-      <button class="ctrl-btn" onclick="skipVideo(10)">⏩</button>
-      <button class="ctrl-btn">🔊</button>
-      <span class="ctrl-time" id="current-time">0:35</span>
-      <span style="color:var(--text3);font-family:var(--font-mono);font-size:13px;">/ 1:47:20</span>
-      <div class="ctrl-spacer"></div>
-      <div class="quality-badge" onclick="showToast('📺 Calidad: 1080p → 4K')">1080p</div>
-      <button class="ctrl-btn" onclick="showToast('📺 Pantalla completa')">⛶</button>
+  <div class="player-controls" style="padding:12px 20px;">
+    <div class="ctrl-row" style="justify-content:space-between;">
+      <div id="modal-meta" style="font-size:13px;color:var(--text2);"></div>
+      <button onclick="toggleModalFullscreen()" style="background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 14px;cursor:pointer;font-size:13px;">⛶ Pantalla completa</button>
     </div>
   </div>
 </div>
@@ -2157,91 +2151,80 @@ function initFirebase() {
     window.db   = _db;
     console.log('[StreamVibe] Firebase listo');
 
-    // Cargar contenido desde Firebase (sv_content) — sin filtro para evitar índices
-    _db.collection('sv_content').onSnapshot(function(snap){
-      if(!snap.empty){
-        var fbContent = snap.docs.filter(function(d){ return d.data().active !== false; }).map(function(d){
-          var data = d.data();
-          return {
-            id:       parseInt(d.id)||Math.floor(Math.random()*9000+1000),
-            fbId:     d.id,
-            title:    data.title||'Sin título',
-            genre:    data.genre||'Acción',
-            type:     data.type||'Película',
-            year:     data.year||2024,
-            rating:   data.rating||8.0,
-            badge:    data.access||'GRATIS',
-            desc:     data.desc||'',
-            emoji:    data.emoji||'🎬',
-            bg1:      data.bg1||'#0d0221',
-            bg2:      data.bg2||'#1a0545',
-            duration: data.duration||'',
-            stream:   data.stream||''
-          };
-        });
-        // Merge with existing content or replace
-        if(fbContent.length > 0){
-          window.allContent = fbContent;
-          window.filtered   = fbContent.slice();
-          // Actualizar TODAS las referencias al contenido
-          window.allContent = fbContent;
-          allContent = fbContent;
-          filtered = fbContent.slice();
-          console.log('[StreamVibe] ✅ '+fbContent.length+' títulos cargados de Firebase');
+    // Cargar contenido desde Firebase — paginado para manejar colecciones grandes
+    function _docToItem(d){
+      var data = d.data();
+      return {
+        id:       d.id,
+        fbId:     d.id,
+        title:    data.title||'Sin título',
+        genre:    data.genre||data.group||'General',
+        type:     data.type||'Película',
+        m3uType:  data.m3uType||'',
+        year:     data.year||2024,
+        rating:   data.rating||8.0,
+        badge:    data.access||'GRATIS',
+        desc:     data.desc||'',
+        emoji:    data.emoji||'🎬',
+        logo:     data.logo||'',
+        bg1:      data.bg1||'#0d0221',
+        bg2:      data.bg2||'#1a0545',
+        duration: data.duration||'',
+        stream:   data.stream||''
+      };
+    }
 
-          // Actualizar hero cards con contenido real
-          var movies = fbContent.filter(function(c){ return c.type==='Película'||c.m3uType==='movie'; });
-          var live   = fbContent.filter(function(c){ return c.type==='Canal'||c.m3uType==='live'; });
-          var any    = fbContent;
-          function setHeroCard(n, item){
-            try{
-              var t=document.getElementById('hc'+n+'-title');
-              var m=document.getElementById('hc'+n+'-meta');
-              if(t && item) t.textContent = item.title||'';
-              if(m && item) m.textContent = (item.genre||'')+(item.year?' • '+item.year:'')+(item.rating?' ⭐'+item.rating:'');
-            }catch(e){}
-          }
-          if(any[0])    setHeroCard(1, any[0]);
-          if(movies[0]) setHeroCard(2, movies[0]);
-          if(live[0])   setHeroCard(3, live[0]);
-
-          // Re-renderizar la página activa
-          var pg = window._currentPage || 'landing';
-          allContent = fbContent; // sincronizar variable local
-          if(pg === 'landing' && typeof renderCarousels === 'function'){
-            renderCarousels();
-          } else if(pg === 'catalog'){
-            // Respetar género pendiente o género actual
-            if(typeof window._pendingCatalogGenre !== 'undefined' && window._pendingCatalogGenre !== null){
-              currentGenre = window._pendingCatalogGenre || '';
-              window._pendingCatalogGenre = null;
-            }
-            if(typeof applyFilters === 'function') applyFilters();
-            else if(typeof renderGrid === 'function') renderGrid();
-          }
-          // Forzar actualización en todas las páginas
-          setTimeout(function(){
-            var pg2 = window._currentPage || 'landing';
-            if(typeof renderCarousels === 'function') renderCarousels();
-            if(pg2 === 'catalog'){
-              allContent = window.allContent;
-              if(typeof applyFilters === 'function') applyFilters();
-            }
-          }, 300);
-          // Segunda actualización para asegurar
-          setTimeout(function(){
-            var pg3 = window._currentPage || 'landing';
-            if(pg3 === 'catalog' && typeof renderGrid === 'function'){
-              filtered = window.allContent.slice();
-              renderGrid();
-            }
-          }, 1500);
-          console.log('[StreamVibe] '+fbContent.length+' títulos cargados desde Firebase');
+    function _applyContent(fbContent){
+      if(!fbContent.length) return;
+      window.allContent = fbContent;
+      window.filtered   = fbContent.slice();
+      allContent        = fbContent;
+      filtered          = fbContent.slice();
+      console.log('[StreamVibe] ✅ '+fbContent.length+' títulos listos');
+      var pg = window._currentPage || 'landing';
+      if(pg === 'landing' && typeof renderCarousels === 'function') renderCarousels();
+      else if(pg === 'catalog'){
+        if(typeof window._pendingCatalogGenre !== 'undefined' && window._pendingCatalogGenre !== null){
+          currentGenre = window._pendingCatalogGenre || '';
+          window._pendingCatalogGenre = null;
         }
+        if(typeof applyFilters === 'function') applyFilters();
+        else if(typeof renderGrid === 'function') renderGrid();
       }
-    });
+    }
 
-    // Cargar canales IPTV
+    function _loadContentPage(lastDoc, accum){
+      var q = lastDoc
+        ? _db.collection('sv_content').orderBy('__name__').startAfter(lastDoc).limit(200)
+        : _db.collection('sv_content').orderBy('__name__').limit(200);
+      q.get().then(function(snap){
+        console.log('[StreamVibe] Página cargada: '+snap.size+' docs (acumulado: '+(accum.length+snap.size)+')');
+        snap.docs.forEach(function(d){
+          if(d.data().active !== false) accum.push(_docToItem(d));
+        });
+        if(snap.size === 200){
+          // Hay más páginas
+          _loadContentPage(snap.docs[snap.docs.length-1], accum);
+        } else {
+          // Última página — aplicar todo
+          _applyContent(accum);
+        }
+      }).catch(function(err){
+        console.error('[StreamVibe] ERROR cargando sv_content:', err.code, err.message);
+        // Intentar sin orderBy si hay error de índice
+        _db.collection('sv_content').limit(500).get().then(function(snap2){
+          var items = snap2.docs
+            .filter(function(d){ return d.data().active !== false; })
+            .map(function(d){ return _docToItem(d); });
+          _applyContent(items);
+        }).catch(function(e2){
+          console.error('[StreamVibe] ERROR fallback:', e2.message);
+        });
+      });
+    }
+    _loadContentPage(null, []);
+
+    // Canales IPTV (colección separada)
     _db.collection('sv_iptv').onSnapshot(function(snap){
       if(!snap.empty){
         var channels = snap.docs.map(function(d){
@@ -2441,7 +2424,7 @@ function renderGrid(){
 function makeCard(item){
   var inList = (myList||[]).includes(item.id);
   if(currentView==='list'){
-    return '<div class="ccard" onclick="openPlayer('+item.id+')">'
+    return '<div class="ccard" onclick="openPlayer(\''+item.id+'\')">'  
       +'<div class="ccard-thumb"><div class="thumb-bg" style="background:linear-gradient(135deg,'+item.bg1+','+item.bg2+')"></div>'
         +'<div style="position:relative;z-index:1;font-size:32px;">'+item.emoji+'</div>'
         +'<div class="ccard-overlay"><div class="play-btn">▶</div></div>'
@@ -2458,10 +2441,13 @@ function makeCard(item){
       +'</div>'
     +'</div>';
   }
-  return '<div class="ccard" onclick="openPlayer('+item.id+')">'
+  var thumbContent = item.logo
+    ? '<img src="'+item.logo+'" style="position:relative;z-index:1;width:64px;height:64px;border-radius:10px;object-fit:cover;" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'block\'" /><div style="position:relative;z-index:1;font-size:44px;display:none;">'+item.emoji+'</div>'
+    : '<div style="position:relative;z-index:1;font-size:44px;">'+item.emoji+'</div>';
+  return '<div class="ccard" onclick="openPlayer(\''+item.id+'\')">'
     +'<div class="ccard-thumb">'
       +'<div class="thumb-bg" style="background:linear-gradient(135deg,'+item.bg1+','+item.bg2+')"></div>'
-      +'<div style="position:relative;z-index:1;font-size:44px;">'+item.emoji+'</div>'
+      +thumbContent
       +'<div class="ccard-overlay">'
         +'<div class="play-btn">▶</div>'
         +'<div class="ccard-actions">'
@@ -2574,63 +2560,90 @@ function toggleList(id){
   renderGrid();
 }
 
-// ── PLAYER ───────────────────────────────────────
+// ── PLAYER MODAL (catálogo) ──────────────────────
+var _modalHls = null;
+
 function openPlayer(id){
-  var item=allContent.find(function(c){return c.id===id;});
-  if(!item) return;
+  var item = allContent.find(function(c){ return c.id===id || c.id===String(id) || String(c.id)===String(id); });
+  if(!item){ showToast('❌ Contenido no encontrado'); return; }
   if(item.badge==='PRO'){
     showToast('⭐ Este contenido es PRO — Actualiza tu plan');
     return;
   }
-  document.getElementById('player-title').textContent=item.title;
-  document.getElementById('player-emoji').textContent=item.emoji;
-  document.getElementById('player-movie-title').textContent=item.title;
+  if(!item.stream){
+    showToast('⚠️ Este título no tiene stream disponible');
+    return;
+  }
+
+  // Llenar UI
+  document.getElementById('player-title').textContent = item.title;
+  document.getElementById('player-emoji').textContent = item.emoji || '🎬';
+  document.getElementById('player-movie-title').textContent = item.title;
+  document.getElementById('modal-meta').textContent = (item.genre||'') + (item.year?' · '+item.year:'') + (item.type==='Canal'?' · 🔴 En vivo':'');
+  document.getElementById('modal-status').textContent = '⏳ Conectando stream...';
+
+  // Logo del canal si existe
+  var logoEl = document.getElementById('modal-logo');
+  if(item.logo){ logoEl.src=item.logo; logoEl.style.display='block'; }
+  else { logoEl.style.display='none'; }
+
+  // Mostrar poster mientras carga
+  document.getElementById('modal-poster').style.display='flex';
   document.getElementById('player-modal').classList.add('open');
-  isPlaying=true;
-  document.getElementById('play-btn').textContent='⏸';
-  currentProgress=Math.floor(Math.random()*40)+10;
-  updateProgress();
-  startProgressTimer();
+
+  // Cargar video
+  var video = document.getElementById('modal-video');
+  if(_modalHls){ _modalHls.destroy(); _modalHls=null; }
+  video.pause();
+  video.src='';
+
+  var url = item.stream;
+
+  function onVideoReady(){
+    document.getElementById('modal-status').textContent = '✅ Conectado — reproduciendo';
+    setTimeout(function(){ document.getElementById('modal-poster').style.display='none'; }, 800);
+    video.play().catch(function(e){ console.warn('Autoplay bloqueado:', e.message); });
+  }
+
+  function onVideoError(msg){
+    document.getElementById('modal-status').textContent = '❌ ' + (msg||'Error al cargar el stream');
+    console.warn('[Player] Error stream:', url, msg);
+  }
+
+  if(Hls.isSupported() && (url.includes('.m3u8') || url.includes('m3u'))){
+    _modalHls = new Hls({ enableWorker:true, lowLatencyMode:true });
+    _modalHls.loadSource(url);
+    _modalHls.attachMedia(video);
+    _modalHls.on(Hls.Events.MANIFEST_PARSED, onVideoReady);
+    _modalHls.on(Hls.Events.ERROR, function(e, data){
+      if(data.fatal) onVideoError('Stream no compatible o sin acceso');
+    });
+  } else if(video.canPlayType('application/vnd.apple.mpegurl')){
+    // Safari nativo HLS
+    video.src = url;
+    video.addEventListener('loadedmetadata', onVideoReady, {once:true});
+    video.addEventListener('error', function(){ onVideoError('Error al cargar'); }, {once:true});
+  } else {
+    // Intentar reproducción directa (MP4, etc.)
+    video.src = url;
+    video.addEventListener('canplay', onVideoReady, {once:true});
+    video.addEventListener('error', function(){ onVideoError('Formato no soportado'); }, {once:true});
+  }
 }
 
 function closePlayer(){
   document.getElementById('player-modal').classList.remove('open');
-  clearInterval(progressInterval);
+  var video = document.getElementById('modal-video');
+  if(_modalHls){ _modalHls.destroy(); _modalHls=null; }
+  video.pause();
+  video.src='';
+  document.getElementById('modal-poster').style.display='flex';
 }
 
-function togglePlay(){
-  isPlaying=!isPlaying;
-  document.getElementById('play-btn').textContent=isPlaying?'⏸':'▶';
-  if(isPlaying) startProgressTimer(); else clearInterval(progressInterval);
-}
-
-function startProgressTimer(){
-  clearInterval(progressInterval);
-  progressInterval=setInterval(function(){
-    if(currentProgress<100){ currentProgress+=0.05; updateProgress(); }
-    else clearInterval(progressInterval);
-  },500);
-}
-
-function updateProgress(){
-  document.getElementById('progress-fill').style.width=Math.min(currentProgress,100)+'%';
-  var totalSec=6440;
-  var cur=Math.floor(totalSec*currentProgress/100);
-  var m=Math.floor(cur/60),s=cur%60;
-  document.getElementById('current-time').textContent=m+':'+(s<10?'0':'')+s;
-}
-
-function seekVideo(e){
-  var bar=e.currentTarget;
-  var rect=bar.getBoundingClientRect();
-  currentProgress=((e.clientX-rect.left)/rect.width)*100;
-  updateProgress();
-}
-
-function skipVideo(sec){
-  var totalSec=6440;
-  currentProgress=Math.max(0,Math.min(100,currentProgress+(sec/totalSec*100)));
-  updateProgress();
+function toggleModalFullscreen(){
+  var video = document.getElementById('modal-video');
+  if(video.requestFullscreen) video.requestFullscreen();
+  else if(video.webkitRequestFullscreen) video.webkitRequestFullscreen();
 }
 
 // ── TOAST ─────────────────────────────────────────
