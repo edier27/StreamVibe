@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>StreamVibe — Admin M3U</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0A0A0F;--s1:#13131A;--s2:#1C1C26;--s3:#242430;
+  --accent:#7B2FFF;--accent2:#9B5FFF;--orange:#FF6B35;
+  --green:#10B981;--red:#EF4444;--yellow:#F59E0B;--blue:#3B82F6;
+  --text:#FFFFFF;--text2:#A0A0B0;--text3:#606070;
+  --border:rgba(255,255,255,0.08);
+  --font-display:'Syne',sans-serif;--font-body:'Inter',sans-serif;--font-mono:'DM Mono',monospace;
+  --r:10px;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--accent);border-radius:4px;}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;z-index:999;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+.login-box{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:40px;width:360px;text-align:center;}
+.login-logo{font-family:var(--font-display);font-size:26px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.login-sub{font-size:13px;color:var(--text3);margin-bottom:28px;}
+.l-inp{width:100%;background:var(--s2);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-size:14px;outline:none;transition:.2s;font-family:var(--font-body);margin-bottom:12px;text-align:left;}
+.l-inp:focus{border-color:var(--accent);}
+.l-inp::placeholder{color:var(--text3);}
+.l-btn{width:100%;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font-display);}
+.l-err{font-size:12px;color:var(--red);margin-top:10px;display:none;}
+
+/* LAYOUT */
+.layout{display:flex;min-height:100vh;}
+.sidebar{width:220px;background:var(--s1);border-right:1px solid var(--border);position:fixed;top:0;bottom:0;display:flex;flex-direction:column;}
+.sb-logo{padding:18px 16px;border-bottom:1px solid var(--border);}
+.sb-logo-txt{font-family:var(--font-display);font-size:17px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sb-badge{font-size:9px;font-weight:700;background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.25);padding:2px 7px;border-radius:5px;font-family:var(--font-mono);margin-left:6px;vertical-align:middle;}
+.sb-nav{padding:12px 8px;flex:1;overflow-y:auto;}
+.sb-lbl{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;padding:0 8px;margin:8px 0 4px;font-family:var(--font-mono);}
+.sb-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:.15s;width:100%;background:none;border:none;font-family:var(--font-body);text-align:left;}
+.sb-item:hover{background:var(--s2);color:var(--text);}
+.sb-item.active{background:rgba(123,47,255,.15);color:var(--accent2);font-weight:600;}
+.sb-ic{width:28px;height:28px;border-radius:7px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
+.sb-item.active .sb-ic{background:var(--accent);}
+.sb-cnt{margin-left:auto;background:var(--s3);color:var(--text3);font-size:10px;font-weight:700;padding:2px 6px;border-radius:6px;font-family:var(--font-mono);}
+.sb-bottom{padding:12px;border-top:1px solid var(--border);}
+.sb-user{display:flex;align-items:center;gap:8px;}
+.sb-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--orange));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.sb-uname{font-size:12px;font-weight:600;flex:1;}
+.sb-out{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:4px;}
+.sb-out:hover{color:var(--red);}
+
+/* MAIN */
+.main{margin-left:220px;padding:28px 32px;flex:1;}
+.ph{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;}
+.pt{font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:-.5px;}
+.pt span{color:var(--accent2);}
+
+/* CARD */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:16px;}
+.ch{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.ct{font-family:var(--font-display);font-size:15px;font-weight:700;}
+.cb{padding:20px;}
+
+/* M3U INPUT AREA */
+.m3u-box{background:var(--s2);border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;transition:.2s;cursor:pointer;margin-bottom:16px;}
+.m3u-box:hover,.m3u-box.drag{border-color:var(--accent);background:rgba(123,47,255,.05);}
+.m3u-icon{font-size:40px;margin-bottom:12px;}
+.m3u-title{font-family:var(--font-display);font-size:16px;font-weight:700;margin-bottom:6px;}
+.m3u-sub{font-size:13px;color:var(--text2);margin-bottom:16px;}
+.url-row{display:flex;gap:10px;}
+.url-inp{flex:1;background:var(--s1);border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-size:13px;font-family:var(--font-body);outline:none;transition:.2s;}
+.url-inp:focus{border-color:var(--accent);}
+.url-inp::placeholder{color:var(--text3);}
+
+/* PROGRESS */
+.progress-wrap{background:var(--s2);border-radius:10px;padding:16px 20px;display:none;margin-bottom:16px;}
+.prog-title{font-size:13px;font-weight:600;margin-bottom:10px;display:flex;justify-content:space-between;}
+.prog-bar-bg{height:6px;background:var(--s3);border-radius:3px;overflow:hidden;margin-bottom:8px;}
+.prog-bar-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--orange));border-radius:3px;transition:.3s;width:0%;}
+.prog-log{font-size:11px;color:var(--text3);font-family:var(--font-mono);max-height:80px;overflow-y:auto;}
+.prog-log div{margin-bottom:2px;}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+.stat{background:var(--s2);border-radius:10px;padding:14px;text-align:center;}
+.stat-n{font-family:var(--font-display);font-size:24px;font-weight:800;margin-bottom:2px;}
+.stat-l{font-size:11px;color:var(--text3);font-family:var(--font-mono);text-transform:uppercase;}
+
+/* FILTER BAR */
+.filter-bar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;}
+.f-inp{background:var(--s2);border:1.5px solid var(--border);border-radius:9px;padding:9px 13px;color:var(--text);font-size:13px;font-family:var(--font-body);outline:none;transition:.2s;flex:1;min-width:180px;}
+.f-inp:focus{border-color:var(--accent);}
+.f-inp::placeholder{color:var(--text3);}
+.f-sel{background:var(--s2);border:1.5px solid var(--border);border-radius:9px;padding:9px 13px;color:var(--text2);font-size:13px;font-family:var(--font-body);outline:none;cursor:pointer;transition:.2s;}
+.f-sel:focus{border-color:var(--accent);}
+.f-sel option{background:var(--s2);}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:12px;}
+.tbl th{padding:9px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;border-bottom:1px solid var(--border);font-family:var(--font-mono);white-space:nowrap;}
+.tbl td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:rgba(255,255,255,.02);}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:3px 8px;border-radius:5px;font-family:var(--font-mono);}
+.bg{background:rgba(16,185,129,.12);color:var(--green);border:1px solid rgba(16,185,129,.25);}
+.bo{background:rgba(255,107,53,.12);color:var(--orange);border:1px solid rgba(255,107,53,.25);}
+.bp{background:rgba(123,47,255,.12);color:var(--accent2);border:1px solid rgba(123,47,255,.25);}
+.bb{background:rgba(59,130,246,.12);color:var(--blue);border:1px solid rgba(59,130,246,.25);}
+.br{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25);}
+.thumb{width:36px;height:48px;border-radius:6px;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.ci{display:flex;align-items:center;gap:10px;}
+.cn{font-weight:600;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;}
+.cm{font-size:10px;color:var(--text3);}
+
+/* BTN */
+.btn{padding:9px 18px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-display);transition:.2s;border:none;display:inline-flex;align-items:center;gap:6px;}
+.btn-p{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 3px 14px rgba(123,47,255,.35);}
+.btn-p:hover{box-shadow:0 5px 20px rgba(123,47,255,.55);transform:translateY(-1px);}
+.btn-p:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.btn-s{background:var(--s2);color:var(--text2);border:1px solid var(--border);}
+.btn-s:hover{color:var(--text);border-color:rgba(255,255,255,.2);}
+.btn-d{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.25);}
+.btn-d:hover{background:var(--red);color:#fff;}
+.btn-sm{padding:5px 10px;font-size:11px;}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 20px;color:var(--text3);}
+.empty-ic{font-size:44px;margin-bottom:12px;}
+.empty-t{font-size:15px;font-weight:600;color:var(--text2);margin-bottom:6px;}
+.empty-s{font-size:13px;}
+
+/* PAGES */
+.page{display:none;}
+.page.active{display:block;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:12px 18px;font-size:13px;font-weight:500;z-index:9999;display:none;align-items:center;gap:8px;box-shadow:0 8px 28px rgba(0,0,0,.6);max-width:400px;}
+.toast.show{display:flex;animation:su .25s ease;}
+@keyframes su{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">StreamVibe</div>
+    <div class="login-sub">Panel de Administración M3U</div>
+    <input class="l-inp" id="l-pass" type="password" placeholder="Contraseña de acceso" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="l-btn" onclick="doLogin()">🔐 Ingresar</button>
+    <div class="l-err" id="l-err">Contraseña incorrecta</div>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout" id="admin-panel" style="display:none;">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">
+      <span class="sb-logo-txt">StreamVibe</span>
+      <span class="sb-badge">ADMIN</span>
+    </div>
+    <div class="sb-nav">
+      <div class="sb-lbl">Principal</div>
+      <button class="sb-item active" onclick="goPage('m3u',this)"><div class="sb-ic">📡</div> Lista M3U <span class="sb-cnt" id="cnt-total">0</span></button>
+      <button class="sb-item" onclick="goPage('movies',this)"><div class="sb-ic">🎬</div> Películas <span class="sb-cnt" id="cnt-movies">0</span></button>
+      <button class="sb-item" onclick="goPage('series',this)"><div class="sb-ic">📺</div> Series <span class="sb-cnt" id="cnt-series">0</span></button>
+      <button class="sb-item" onclick="goPage('live',this)"><div class="sb-ic">🔴</div> TV en Vivo <span class="sb-cnt" id="cnt-live">0</span></button>
+      <button class="sb-item" onclick="goPage('docs',this)"><div class="sb-ic">🎥</div> Documentales <span class="sb-cnt" id="cnt-docs">0</span></button>
+      <div class="sb-lbl" style="margin-top:12px;">Gestión</div>
+      <button class="sb-item" onclick="goPage('sync',this)"><div class="sb-ic">🔄</div> Sincronizar</button>
+      <button class="sb-item" onclick="goPage('settings',this)"><div class="sb-ic">⚙️</div> Configuración</button>
+    </div>
+    <div class="sb-bottom">
+      <div class="sb-user">
+        <div class="sb-av">A</div>
+        <div class="sb-uname">Administrador</div>
+        <button class="sb-out" onclick="doLogout()" title="Salir">🚪</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- ── M3U PAGE ── -->
+    <div class="page active" id="page-m3u">
+      <div class="ph">
+        <div class="pt">📡 Lista <span>M3U</span></div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-s btn-sm" onclick="clearAll()">🗑️ Limpiar todo</button>
+          <button class="btn btn-p" id="btn-sync" onclick="syncToFirebase()" disabled>☁️ Publicar en StreamVibe</button>
+        </div>
+      </div>
+
+      <!-- URL INPUT -->
+      <div class="card">
+        <div class="ch"><div class="ct">🔗 Cargar lista M3U</div></div>
+        <div class="cb">
+          <div class="m3u-box" id="drop-zone" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleDrop(event)">
+            <div class="m3u-icon">📋</div>
+            <div class="m3u-title">Pega el link de tu lista M3U</div>
+            <div class="m3u-sub">O arrastra un archivo .m3u / .m3u8 aquí<br><small style="color:var(--text3);">Compatible con: IPTV, Plex, Emby, Jellyfin y cualquier lista M3U estándar</small></div>
+            <div class="url-row">
+              <input class="url-inp" id="m3u-url" placeholder="https://ejemplo.com/lista.m3u?username=xxx&password=xxx&type=m3u_plus" onkeydown="if(event.key==='Enter')loadM3U()">
+              <button class="btn btn-p" onclick="loadM3U()" id="btn-load">⬇️ Cargar</button>
+            </div>
+          </div>
+
+          <!-- Opciones de mapeo -->
+          <div style="background:var(--s2);border-radius:10px;padding:14px 16px;margin-bottom:0;">
+            <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.8px;font-family:var(--font-mono);">⚙️ Opciones de clasificación automática</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:12px;">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="opt-movies" checked> Detectar películas</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="opt-series" checked> Detectar series</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="opt-live" checked> Detectar TV en vivo</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="opt-thumb" checked> Cargar miniaturas</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="opt-free" checked> Todo gratis por defecto</label>
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="opt-replace"> Reemplazar contenido existente</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="progress-wrap card" id="prog-wrap" style="display:block;display:none;">
+        <div class="cb">
+          <div class="prog-title"><span id="prog-label">Cargando lista M3U...</span><span id="prog-pct">0%</span></div>
+          <div class="prog-bar-bg"><div class="prog-bar-fill" id="prog-fill"></div></div>
+          <div class="prog-log" id="prog-log"></div>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stats-row" id="stats-row" style="display:none;">
+        <div class="stat"><div class="stat-n" id="s-total">0</div><div class="stat-l">Total</div></div>
+        <div class="stat"><div class="stat-n" id="s-movies" style="color:var(--orange);">0</div><div class="stat-l">Películas</div></div>
+        <div class="stat"><div class="stat-n" id="s-series" style="color:var(--accent2);">0</div><div class="stat-l">Series</div></div>
+        <div class="stat"><div class="stat-n" id="s-live" style="color:var(--red);">0</div><div class="stat-l">TV en Vivo</div></div>
+        <div class="stat"><div class="stat-n" id="s-docs" style="color:var(--green);">0</div><div class="stat-l">Otros</div></div>
+      </div>
+
+      <!-- PREVIEW TABLE -->
+      <div class="card" id="preview-card" style="display:none;">
+        <div class="ch">
+          <div class="ct">Vista previa del contenido importado</div>
+          <div style="font-size:12px;color:var(--text3);" id="preview-count"></div>
+        </div>
+        <div class="cb" style="padding:0;">
+          <div class="filter-bar" style="padding:14px 14px 0;">
+            <input class="f-inp" placeholder="🔍 Buscar..." oninput="filterPreview(this.value)">
+            <select class="f-sel" onchange="filterPreviewType(this.value)">
+              <option value="">Todos</option>
+              <option value="movie">🎬 Películas</option>
+              <option value="series">📺 Series</option>
+              <option value="live">🔴 TV en Vivo</option>
+              <option value="other">📁 Otros</option>
+            </select>
+          </div>
+          <div style="max-height:400px;overflow-y:auto;">
+            <table class="tbl"><thead><tr><th>Contenido</th><th>Tipo detectado</th><th>Grupo M3U</th><th>URL</th><th>Acceso</th><th></th></tr></thead>
+            <tbody id="preview-tbody"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MOVIES PAGE ── -->
+    <div class="page" id="page-movies">
+      <div class="ph"><div class="pt">🎬 <span>Películas</span></div></div>
+      <div class="filter-bar">
+        <input class="f-inp" placeholder="🔍 Buscar película..." oninput="filterPage('movies',this.value)">
+        <select class="f-sel" onchange="filterPageAccess('movies',this.value)">
+          <option value="">Todos los accesos</option>
+          <option value="GRATIS">Gratis</option><option value="PRO">Pro</option><option value="PREMIUM">Premium</option>
+        </select>
+      </div>
+      <div class="card"><div style="max-height:65vh;overflow-y:auto;"><table class="tbl"><thead><tr><th>Título</th><th>Grupo</th><th>Acceso</th><th>URL</th><th></th></tr></thead><tbody id="movies-tbody"></tbody></table></div></div>
+    </div>
+
+    <!-- ── SERIES PAGE ── -->
+    <div class="page" id="page-series">
+      <div class="ph"><div class="pt">📺 <span>Series</span></div></div>
+      <div class="filter-bar">
+        <input class="f-inp" placeholder="🔍 Buscar serie..." oninput="filterPage('series',this.value)">
+      </div>
+      <div class="card"><div style="max-height:65vh;overflow-y:auto;"><table class="tbl"><thead><tr><th>Título</th><th>Temporada/Ep</th><th>Grupo</th><th>Acceso</th><th></th></tr></thead><tbody id="series-tbody"></tbody></table></div></div>
+    </div>
+
+    <!-- ── LIVE PAGE ── -->
+    <div class="page" id="page-live">
+      <div class="ph"><div class="pt">🔴 TV <span>en Vivo</span></div></div>
+      <div class="filter-bar">
+        <input class="f-inp" placeholder="🔍 Buscar canal..." oninput="filterPage('live',this.value)">
+        <select class="f-sel" onchange="filterPageGroup('live',this.value)" id="live-group-filter">
+          <option value="">Todos los grupos</option>
+        </select>
+      </div>
+      <div class="card"><div style="max-height:65vh;overflow-y:auto;"><table class="tbl"><thead><tr><th>Canal</th><th>Grupo/País</th><th>Acceso</option><th>URL</th><th></th></tr></thead><tbody id="live-tbody"></tbody></table></div></div>
+    </div>
+
+    <!-- ── DOCS PAGE ── -->
+    <div class="page" id="page-docs">
+      <div class="ph"><div class="pt">🎥 <span>Otros / Documentales</span></div></div>
+      <div class="card"><div style="max-height:65vh;overflow-y:auto;"><table class="tbl"><thead><tr><th>Título</th><th>Grupo</th><th>Acceso</th><th></th></tr></thead><tbody id="docs-tbody"></tbody></table></div></div>
+    </div>
+
+    <!-- ── SYNC PAGE ── -->
+    <div class="page" id="page-sync">
+      <div class="ph"><div class="pt">🔄 <span>Sincronizar</span></div></div>
+      <div class="card">
+        <div class="ch"><div class="ct">Estado de sincronización con Firebase</div></div>
+        <div class="cb">
+          <div id="sync-status" style="font-size:14px;color:var(--text2);margin-bottom:20px;">Carga una lista M3U y luego sincroniza para publicar en StreamVibe.</div>
+          <div class="stats-row" id="sync-stats" style="display:none;margin-bottom:20px;"></div>
+          <button class="btn btn-p" onclick="syncToFirebase()" id="sync-btn" style="width:100%;padding:16px;font-size:16px;">☁️ Publicar todo en StreamVibe</button>
+          <div style="font-size:12px;color:var(--text3);margin-top:10px;text-align:center;">Esto actualizará el contenido visible para todos los usuarios de StreamVibe</div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:16px;">
+        <div class="ch"><div class="ct">📋 Historial de sincronizaciones</div></div>
+        <div class="cb" id="sync-history"><div class="empty"><div class="empty-ic">📋</div><div class="empty-t">Sin sincronizaciones aún</div></div></div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS PAGE ── -->
+    <div class="page" id="page-settings">
+      <div class="ph"><div class="pt">⚙️ <span>Configuración</span></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="card">
+          <div class="ch"><div class="ct">🔐 Acceso al panel</div></div>
+          <div class="cb">
+            <div style="margin-bottom:12px;"><label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;font-family:var(--font-mono);display:block;margin-bottom:6px;">Contraseña del panel</label>
+            <input class="f-inp" id="cfg-pass" type="password" placeholder="Nueva contraseña"></div>
+            <button class="btn btn-p btn-sm" onclick="saveAdminPass()">💾 Guardar contraseña</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div class="ct">🔥 Firebase</div></div>
+          <div class="cb">
+            <div style="margin-bottom:10px;"><label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;font-family:var(--font-mono);display:block;margin-bottom:6px;">Project ID</label>
+            <input class="f-inp" id="cfg-fb" value="globalacce-37997" placeholder="proyecto-id"></div>
+            <div style="margin-bottom:12px;"><label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;font-family:var(--font-mono);display:block;margin-bottom:6px;">API Key</label>
+            <input class="f-inp" id="cfg-key" value="AIzaSyAzOoK99y6L95sFAKZFZ0wY42Ljw2YEOM8" placeholder="AIzaSy..."></div>
+            <button class="btn btn-p btn-sm" onclick="saveFBConfig()">💾 Guardar Firebase</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div class="ct">🎯 Clasificación automática</div></div>
+          <div class="cb" style="font-size:13px;color:var(--text2);line-height:1.8;">
+            <div style="margin-bottom:8px;font-weight:600;color:var(--text);">Palabras clave para detectar tipos:</div>
+            <div><span style="color:var(--orange);">Películas:</span> movie, pelicula, film, vod, cine</div>
+            <div><span style="color:var(--accent2);">Series:</span> serie, series, temporada, season, s0, s1, ep</div>
+            <div><span style="color:var(--red);">TV en vivo:</span> live, canal, channel, tv, news, deportes</div>
+            <div><span style="color:var(--green);">Documentales:</span> doc, documental, documentary</div>
+            <div style="margin-top:12px;font-size:11px;color:var(--text3);">La clasificación usa el nombre del canal, grupo y tvg-type del M3U</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><div class="ct">💡 Listas M3U de ejemplo</div></div>
+          <div class="cb" style="font-size:13px;color:var(--text2);line-height:2;">
+            <div>• <strong>IPTV-org (gratis):</strong> github.com/iptv-org/iptv</div>
+            <div>• <strong>Xtream Codes:</strong> host/get.php?username=x&password=x&type=m3u_plus</div>
+            <div>• <strong>Stalker portal:</strong> host/c/</div>
+            <div style="margin-top:10px;font-size:11px;color:var(--text3);">⚠️ Solo use listas con los derechos de transmisión correspondientes</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toast-msg"></span></div>
+
+<script>
+// ══════════════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════════════
+var ADMIN_PASS = localStorage.getItem('sv_admin_pass') || 'streamvibe2024';
+var FIREBASE_CONFIG = {
+  apiKey:            localStorage.getItem('sv_fb_key')  || "AIzaSyAzOoK99y6L95sFAKZFZ0wY42Ljw2YEOM8",
+  authDomain:        "globalacce-37997.firebaseapp.com",
+  projectId:         localStorage.getItem('sv_fb_proj') || "globalacce-37997",
+  storageBucket:     "globalacce-37997.appspot.com",
+  messagingSenderId: "779307465490",
+  appId:             "1:779307465490:web:848a554272501bbaf251cb"
+};
+
+var db = null;
+var _items = [];       // All parsed M3U items
+var _movies = [];
+var _series = [];
+var _live   = [];
+var _docs   = [];
+
+// ── LOGIN ─────────────────────────────────────────
+function doLogin(){
+  var pass = document.getElementById('l-pass').value;
+  if(pass === ADMIN_PASS){
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-panel').style.display  = 'flex';
+    initFB();
+  } else {
+    var e = document.getElementById('l-err');
+    e.textContent = 'Contraseña incorrecta. Prueba: streamvibe2024';
+    e.style.display = 'block';
+  }
+}
+document.getElementById('l-pass').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+
+function doLogout(){
+  document.getElementById('admin-panel').style.display  = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('l-pass').value = '';
+}
+
+// ── FIREBASE ──────────────────────────────────────
+function initFB(){
+  if(typeof firebase === 'undefined'){ setTimeout(initFB, 300); return; }
+  try{
+    var app = firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
+    db = app.firestore();
+    log('✅ Firebase conectado — listo para publicar');
+  }catch(e){
+    log('⚠️ Firebase no disponible: '+e.message);
+  }
+}
+
+// ── M3U PARSER ────────────────────────────────────
+function loadM3U(){
+  var url = document.getElementById('m3u-url').value.trim();
+  if(!url){ showToast('⚠️ Pega el link de tu lista M3U'); return; }
+
+  showProgress('Descargando lista M3U...');
+  setProgress(10);
+
+  // Use CORS proxy to fetch M3U
+  var proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+
+  fetch(proxyUrl)
+    .then(function(r){
+      if(!r.ok) throw new Error('Error HTTP '+r.status);
+      return r.text();
+    })
+    .then(function(text){
+      setProgress(40);
+      log('✅ Lista descargada — '+text.length+' bytes');
+      parseM3U(text);
+    })
+    .catch(function(e){
+      // Try alternate proxy
+      log('⚠️ Proxy 1 falló, probando alternativo...');
+      return fetch('https://api.allorigins.win/get?url='+encodeURIComponent(url))
+        .then(function(r){ return r.json(); })
+        .then(function(data){ parseM3U(data.contents); })
+        .catch(function(e2){
+          hideProgress();
+          showToast('❌ No se pudo cargar la lista. Verifica el URL.');
+          log('❌ Error: '+e2.message);
+        });
+    });
+}
+
+function handleDrop(event){
+  event.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag');
+  var file = event.dataTransfer.files[0];
+  if(!file) return;
+  showProgress('Leyendo archivo M3U...');
+  var reader = new FileReader();
+  reader.onload = function(e){ parseM3U(e.target.result); };
+  reader.readAsText(file);
+}
+
+function parseM3U(text){
+  setProgress(50);
+  log('🔍 Analizando lista M3U...');
+
+  var lines = text.split('\n');
+  var items = [];
+  var current = null;
+
+  for(var i=0; i<lines.length; i++){
+    var line = lines[i].trim();
+    if(!line) continue;
+
+    if(line.startsWith('#EXTM3U')){
+      log('✅ Formato M3U válido detectado');
+      continue;
+    }
+
+    if(line.startsWith('#EXTINF')){
+      current = parseExtInf(line);
+      continue;
+    }
+
+    if(line.startsWith('#')) continue;
+
+    // URL line
+    if(current && (line.startsWith('http')||line.startsWith('rtmp')||line.startsWith('rtsp'))){
+      current.url = line;
+      current.type = detectType(current);
+      items.push(current);
+      current = null;
+    }
+  }
+
+  setProgress(75);
+  log('📊 '+items.length+' entradas encontradas');
+
+  // Classify
+  _items   = items;
+  _movies  = items.filter(function(i){ return i.type==='movie'; });
+  _series  = items.filter(function(i){ return i.type==='series'; });
+  _live    = items.filter(function(i){ return i.type==='live'; });
+  _docs    = items.filter(function(i){ return i.type==='other'; });
+
+  setProgress(90);
+  log('🎬 Películas: '+_movies.length+' | 📺 Series: '+_series.length+' | 🔴 En vivo: '+_live.length+' | 📁 Otros: '+_docs.length);
+
+  // Update UI
+  updateCounters();
+  renderPreview();
+  renderAllTables();
+
+  setProgress(100);
+  setTimeout(hideProgress, 800);
+
+  document.getElementById('btn-sync').disabled = false;
+  showToast('✅ Lista cargada: '+items.length+' elementos en total');
+}
+
+function parseExtInf(line){
+  var item = { title:'', group:'', logo:'', tvgId:'', duration:-1, type:'live' };
+
+  // Duration
+  var durMatch = line.match(/#EXTINF:(-?\d+)/);
+  if(durMatch) item.duration = parseInt(durMatch[1]);
+
+  // tvg-name
+  var nameMatch = line.match(/tvg-name="([^"]*)"/i);
+  if(nameMatch) item.tvgName = nameMatch[1];
+
+  // tvg-id
+  var idMatch = line.match(/tvg-id="([^"]*)"/i);
+  if(idMatch) item.tvgId = idMatch[1];
+
+  // tvg-logo
+  var logoMatch = line.match(/tvg-logo="([^"]*)"/i);
+  if(logoMatch) item.logo = logoMatch[1];
+
+  // group-title
+  var groupMatch = line.match(/group-title="([^"]*)"/i);
+  if(groupMatch) item.group = groupMatch[1];
+
+  // tvg-type
+  var typeMatch = line.match(/tvg-type="([^"]*)"/i);
+  if(typeMatch) item.tvgType = typeMatch[1];
+
+  // Title (last part after comma)
+  var commaIdx = line.lastIndexOf(',');
+  if(commaIdx !== -1) item.title = line.substring(commaIdx+1).trim();
+  if(!item.title && item.tvgName) item.title = item.tvgName;
+
+  item.access = document.getElementById('opt-free') && document.getElementById('opt-free').checked ? 'GRATIS' : 'PRO';
+
+  return item;
+}
+
+function detectType(item){
+  var title = (item.title||'').toLowerCase();
+  var group = (item.group||'').toLowerCase();
+  var tvgType = (item.tvgType||'').toLowerCase();
+
+  // Explicit type from M3U
+  if(tvgType === 'movie') return 'movie';
+  if(tvgType === 'series') return 'series';
+  if(tvgType === 'live') return 'live';
+
+  // Movies by group keywords
+  var movieKw = ['movie','pelicula','película','film','cine','vod','peliculas'];
+  for(var i=0;i<movieKw.length;i++){
+    if(group.includes(movieKw[i])||title.includes(movieKw[i])) return 'movie';
+  }
+
+  // Series by keywords
+  var seriesKw = ['serie','series','temporada','season','episodio',' s0',' s1',' s2',' e0',' e1'];
+  for(var i=0;i<seriesKw.length;i++){
+    if(group.includes(seriesKw[i])||title.includes(seriesKw[i])) return 'series';
+  }
+  // Pattern S01E01
+  if(/s\d{2}e\d{2}/i.test(title)) return 'series';
+
+  // Documentales
+  var docKw = ['documental','documentary','doc','natgeo','discovery','history'];
+  for(var i=0;i<docKw.length;i++){
+    if(group.includes(docKw[i])||title.includes(docKw[i])) return 'other';
+  }
+
+  // Duration: if >0 and >600s = likely movie/series
+  if(item.duration > 600) return 'movie';
+
+  // Default: live TV
+  return 'live';
+}
+
+// ── UI UPDATES ────────────────────────────────────
+function updateCounters(){
+  document.getElementById('cnt-total').textContent  = _items.length;
+  document.getElementById('cnt-movies').textContent = _movies.length;
+  document.getElementById('cnt-series').textContent = _series.length;
+  document.getElementById('cnt-live').textContent   = _live.length;
+  document.getElementById('cnt-docs').textContent   = _docs.length;
+  document.getElementById('s-total').textContent    = _items.length;
+  document.getElementById('s-movies').textContent   = _movies.length;
+  document.getElementById('s-series').textContent   = _series.length;
+  document.getElementById('s-live').textContent     = _live.length;
+  document.getElementById('s-docs').textContent     = _docs.length;
+  document.getElementById('stats-row').style.display = 'grid';
+
+  // Fill live group filter
+  var groups = [...new Set(_live.map(function(i){ return i.group||'Sin grupo'; }))].sort();
+  var sel = document.getElementById('live-group-filter');
+  if(sel){
+    sel.innerHTML = '<option value="">Todos los grupos ('+groups.length+')</option>'
+      + groups.map(function(g){ return '<option value="'+g+'">'+g+'</option>'; }).join('');
+  }
+}
+
+function renderPreview(){
+  var tb = document.getElementById('preview-tbody');
+  var shown = _items.slice(0,200);
+  document.getElementById('preview-count').textContent = 'Mostrando '+shown.length+' de '+_items.length;
+  document.getElementById('preview-card').style.display = 'block';
+
+  tb.innerHTML = shown.map(function(item, i){
+    var typeIcon = {movie:'🎬',series:'📺',live:'🔴',other:'🎥'}[item.type]||'📁';
+    var typeLbl  = {movie:'Película',series:'Serie',live:'TV en vivo',other:'Otro'}[item.type]||'Otro';
+    var typeCls  = {movie:'bo',series:'bp',live:'br',other:'bg'}[item.type]||'bg';
+    var shortUrl = (item.url||'').substring(0,40)+'...';
+    return '<tr>'
+      +'<td><div class="ci">'
+        +(item.logo?'<img src="'+item.logo+'" style="width:32px;height:32px;border-radius:6px;object-fit:cover;" onerror="this.style.display=\'none\'">':'<div class="thumb">'+typeIcon+'</div>')
+        +'<div><div class="cn">'+item.title+'</div><div class="cm">'+(item.tvgId||'—')+'</div></div>'
+      +'</div></td>'
+      +'<td><span class="badge '+typeCls+'">'+typeIcon+' '+typeLbl+'</span></td>'
+      +'<td style="font-size:11px;color:var(--text3);">'+(item.group||'—')+'</td>'
+      +'<td style="font-size:10px;color:var(--text3);font-family:var(--font-mono);">'+shortUrl+'</td>'
+      +'<td><select onchange="_items['+i+'].access=this.value" style="background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text2);font-size:11px;outline:none;">'
+        +'<option value="GRATIS"'+(item.access==='GRATIS'?' selected':'')+'>Gratis</option>'
+        +'<option value="PRO"'+(item.access==='PRO'?' selected':'')+'>Pro</option>'
+        +'<option value="PREMIUM"'+(item.access==='PREMIUM'?' selected':'')+'>Premium</option>'
+      +'</select></td>'
+      +'<td><button class="btn btn-d btn-sm" onclick="removeItem('+i+')">✕</button></td>'
+    +'</tr>';
+  }).join('');
+}
+
+function renderAllTables(){
+  renderTable('movies-tbody', _movies, 'movie');
+  renderTable('series-tbody', _series, 'series');
+  renderTable('live-tbody',   _live,   'live');
+  renderTable('docs-tbody',   _docs,   'other');
+}
+
+function renderTable(tbodyId, items, type){
+  var tb = document.getElementById(tbodyId);
+  if(!items.length){
+    tb.innerHTML='<tr><td colspan="6"><div class="empty"><div class="empty-ic">'
+      +({movie:'🎬',series:'📺',live:'🔴',other:'🎥'}[type]||'📁')
+      +'</div><div class="empty-t">Sin elementos de este tipo</div></div></td></tr>';
+    return;
+  }
+  tb.innerHTML = items.map(function(item){
+    var shortUrl = (item.url||'').substring(0,35)+'...';
+    var epInfo = '';
+    if(type==='series'){
+      var ep = item.title.match(/[Ss](\d{1,2})[Ee](\d{1,2})/);
+      epInfo = ep ? 'T'+ep[1]+' E'+ep[2] : '—';
+    }
+    return '<tr>'
+      +'<td><div class="ci">'
+        +(item.logo?'<img src="'+item.logo+'" style="width:32px;height:32px;border-radius:6px;object-fit:cover;" onerror="this.style.display=\'none\'">':'')
+        +'<div><div class="cn">'+item.title+'</div></div>'
+      +'</div></td>'
+      +(type==='series'?'<td style="font-size:11px;color:var(--text3);">'+epInfo+'</td>':'')
+      +'<td style="font-size:11px;color:var(--text3);">'+(item.group||'—')+'</td>'
+      +'<td><span class="badge '+(item.access==='GRATIS'?'bg':item.access==='PRO'?'bp':'bo')+'">'+item.access+'</span></td>'
+      +(type!=='series'?'<td style="font-size:10px;color:var(--text3);font-family:var(--font-mono);">'+shortUrl+'</td>':'')
+      +'<td><button class="btn btn-s btn-sm" onclick="testStream(\''+item.url.replace(/'/g,"\\'")+'\')" title="Probar stream">▶</button></td>'
+    +'</tr>';
+  }).join('');
+}
+
+function removeItem(idx){
+  _items.splice(idx,1);
+  _movies  = _items.filter(function(i){ return i.type==='movie'; });
+  _series  = _items.filter(function(i){ return i.type==='series'; });
+  _live    = _items.filter(function(i){ return i.type==='live'; });
+  _docs    = _items.filter(function(i){ return i.type==='other'; });
+  updateCounters(); renderPreview(); renderAllTables();
+}
+
+function filterPreview(q){ filterTbody('preview-tbody', q); }
+function filterPreviewType(t){ filterTbodyAttr('preview-tbody', t, 2); }
+function filterPage(page, q){ filterTbody(page+'-tbody', q); }
+function filterPageAccess(page, a){ if(!a){document.querySelectorAll('#'+page+'-tbody tr').forEach(function(r){r.style.display='';}); return;} filterTbodyAttr(page+'-tbody', a, page==='movies'?3:3); }
+function filterPageGroup(page, g){ if(!g){document.querySelectorAll('#'+page+'-tbody tr').forEach(function(r){r.style.display='';}); return;} filterTbodyAttr(page+'-tbody', g, 1); }
+function filterTbody(id, q){ var rows=document.querySelectorAll('#'+id+' tr'); rows.forEach(function(r){ r.style.display=r.textContent.toLowerCase().includes(q.toLowerCase())?'':'none'; }); }
+function filterTbodyAttr(id, val, col){ var rows=document.querySelectorAll('#'+id+' tr'); rows.forEach(function(r){ var cells=r.cells; r.style.display=(!val||!cells[col]||cells[col].textContent.includes(val))?'':'none'; }); }
+
+function testStream(url){
+  window.open('https://hls-js-test.netlify.app/#'+encodeURIComponent(url),'_blank','width=900,height=600');
+}
+
+// ── SYNC TO FIREBASE ──────────────────────────────
+function syncToFirebase(){
+  if(!_items.length){ showToast('⚠️ Primero carga una lista M3U'); return; }
+  if(!db){ showToast('⚠️ Firebase no conectado — verifica la config'); return; }
+
+  var btn = document.getElementById('sync-btn');
+  var btnMain = document.getElementById('btn-sync');
+  btn.disabled = true;
+  if(btnMain) btnMain.disabled = true;
+  btn.textContent = '⏳ Publicando...';
+
+  showProgress('Publicando en Firebase...');
+  setProgress(5);
+
+  var batch;
+  var BATCH_SIZE = 400;
+  var total = _items.length;
+  var done = 0;
+  var errors = 0;
+
+  // Clear existing and upload in batches
+  var replace = document.getElementById('opt-replace') && document.getElementById('opt-replace').checked;
+
+  function uploadBatch(startIdx){
+    batch = db.batch();
+    var end = Math.min(startIdx + BATCH_SIZE, total);
+
+    for(var i=startIdx; i<end; i++){
+      var item = _items[i];
+      var docRef = db.collection('sv_content').doc();
+      var emoji = {movie:'🎬',series:'📺',live:'🔴',other:'🎥'}[item.type]||'🎬';
+      var genre = item.group || {movie:'Película',series:'Serie',live:'TV en vivo',other:'Documental'}[item.type] || 'General';
+
+      batch.set(docRef,{
+        title:    item.title,
+        type:     {movie:'Película',series:'Serie',live:'Canal',other:'Documental'}[item.type]||'Película',
+        genre:    genre,
+        group:    item.group||'',
+        year:     new Date().getFullYear(),
+        rating:   8.0,
+        access:   item.access||'GRATIS',
+        emoji:    item.logo ? '' : emoji,
+        logo:     item.logo||'',
+        stream:   item.url,
+        tvgId:    item.tvgId||'',
+        duration: item.duration>0 ? Math.floor(item.duration/60)+'m' : '',
+        bg1:      '#0d0221',
+        bg2:      '#1a0545',
+        desc:     item.title+' — '+genre,
+        active:   true,
+        m3uType:  item.type,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+
+    batch.commit()
+      .then(function(){
+        done = end;
+        var pct = Math.round(done/total*100);
+        setProgress(pct);
+        log('✅ '+done+'/'+total+' elementos publicados...');
+
+        if(done < total){
+          setTimeout(function(){ uploadBatch(done); }, 300);
+        } else {
+          // Done!
+          setProgress(100);
+          btn.disabled = false;
+          if(btnMain) btnMain.disabled = false;
+          btn.textContent = '☁️ Publicar todo en StreamVibe';
+          setTimeout(hideProgress, 1000);
+
+          // Save sync history
+          var now = new Date();
+          var hist = document.getElementById('sync-history');
+          hist.innerHTML = '<div style="padding:14px 20px;font-size:13px;color:var(--text2);">✅ <strong>'+now.toLocaleString('es-CO')+'</strong> — '+total+' elementos publicados ('+_movies.length+' películas, '+_series.length+' series, '+_live.length+' canales)</div>' + hist.innerHTML;
+
+          showToast('🎉 ¡'+total+' elementos publicados en StreamVibe!');
+          log('🎉 Sincronización completada — '+total+' elementos en Firebase');
+        }
+      })
+      .catch(function(e){
+        errors++;
+        log('❌ Error en lote: '+e.message);
+        btn.disabled = false;
+        if(btnMain) btnMain.disabled = false;
+        btn.textContent = '☁️ Publicar todo en StreamVibe';
+        showToast('❌ Error al publicar: '+e.message);
+      });
+  }
+
+  // If replace, clear collection first
+  if(replace){
+    log('🗑️ Limpiando contenido anterior...');
+    db.collection('sv_content').limit(500).get().then(function(snap){
+      if(snap.empty){ uploadBatch(0); return; }
+      var delBatch = db.batch();
+      snap.docs.forEach(function(d){ delBatch.delete(d.ref); });
+      return delBatch.commit();
+    }).then(function(){ uploadBatch(0); });
+  } else {
+    uploadBatch(0);
+  }
+}
+
+function clearAll(){
+  if(!_items.length){ showToast('No hay contenido cargado'); return; }
+  if(!confirm('¿Limpiar toda la lista cargada?')) return;
+  _items=[]; _movies=[]; _series=[]; _live=[]; _docs=[];
+  document.getElementById('preview-card').style.display='none';
+  document.getElementById('stats-row').style.display='none';
+  document.getElementById('btn-sync').disabled=true;
+  updateCounters();
+  renderAllTables();
+  showToast('🗑️ Lista limpiada');
+}
+
+// ── SETTINGS ──────────────────────────────────────
+function saveAdminPass(){
+  var p = document.getElementById('cfg-pass').value;
+  if(!p){ showToast('⚠️ Escribe una contraseña'); return; }
+  localStorage.setItem('sv_admin_pass', p);
+  ADMIN_PASS = p;
+  showToast('✅ Contraseña actualizada');
+}
+
+function saveFBConfig(){
+  var proj = document.getElementById('cfg-fb').value;
+  var key  = document.getElementById('cfg-key').value;
+  localStorage.setItem('sv_fb_proj', proj);
+  localStorage.setItem('sv_fb_key', key);
+  showToast('✅ Config Firebase guardada — recarga la página para aplicar');
+}
+
+// ── PROGRESS ──────────────────────────────────────
+function showProgress(label){
+  var w=document.getElementById('prog-wrap');
+  w.style.display='block';
+  document.getElementById('prog-label').textContent=label;
+  document.getElementById('prog-fill').style.width='0%';
+  document.getElementById('prog-pct').textContent='0%';
+  document.getElementById('prog-log').innerHTML='';
+}
+function setProgress(pct){
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-pct').textContent=pct+'%';
+}
+function hideProgress(){
+  document.getElementById('prog-wrap').style.display='none';
+}
+function log(msg){
+  var el=document.getElementById('prog-log');
+  if(el){
+    var d=document.createElement('div');
+    d.textContent=msg;
+    el.appendChild(d);
+    el.scrollTop=el.scrollHeight;
+  }
+  console.log('[StreamVibe Admin]',msg);
+}
+
+// ── NAV ───────────────────────────────────────────
+function goPage(page, btn){
+  document.querySelectorAll('.page').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.sb-item').forEach(function(b){ b.classList.remove('active'); });
+  var el=document.getElementById('page-'+page);
+  if(el) el.classList.add('active');
+  if(btn) btn.classList.add('active');
+  else document.querySelector('[onclick*="goPage(\''+page+'\'"]') && document.querySelector('[onclick*="goPage(\''+page+'\'"]').classList.add('active');
+}
+
+// ── TOAST ─────────────────────────────────────────
+var _tt;
+function showToast(msg){
+  var t=document.getElementById('toast');
+  document.getElementById('toast-msg').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(_tt);
+  _tt=setTimeout(function(){ t.classList.remove('show'); },4000);
+}
+
+// Init
+setTimeout(function(){
+  if(typeof firebase !== 'undefined') initFB();
+},500);
+</script>
+</body>
+</html>
