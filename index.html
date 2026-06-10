@@ -250,6 +250,60 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 32px;display:fl
 /* SIDEBAR */
 .layout{display:flex;padding-top:62px;min-height:100vh;}
 .sidebar{width:220px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);padding:20px 0;position:fixed;top:62px;bottom:0;overflow-y:auto;}
+/* ── MAGIS STYLE CATALOG ── */
+.cat-hero{background:linear-gradient(135deg,#0d0221 0%,#1a0545 60%,#0d0221 100%);padding:28px 32px 20px;border-bottom:1px solid var(--border);}
+.cat-hero-title{font-family:var(--font-display);font-size:26px;font-weight:800;margin-bottom:4px;}
+.cat-hero-title span{background:linear-gradient(135deg,var(--accent),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.cat-search-bar{display:flex;gap:10px;align-items:center;background:var(--s2);border:1.5px solid var(--border);border-radius:12px;padding:10px 16px;max-width:480px;margin-top:16px;transition:.2s;}
+.cat-search-bar:focus-within{border-color:var(--accent);}
+.cat-search-bar input{background:none;border:none;outline:none;color:var(--text);font-size:14px;font-family:var(--font-body);flex:1;}
+.cat-search-bar input::placeholder{color:var(--text3);}
+/* Filas horizontales */
+.cat-row{margin-bottom:36px;}
+.cat-row-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:0 2px;}
+.cat-row-title{font-family:var(--font-display);font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.cat-row-see-all{font-size:12px;color:var(--accent2);cursor:pointer;font-weight:600;border:none;background:none;font-family:var(--font-body);}
+.cat-row-see-all:hover{color:var(--accent);}
+.cat-scroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px;scroll-behavior:smooth;}
+.cat-scroll::-webkit-scrollbar{height:3px;}
+.cat-scroll::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px;}
+/* Card Logo (TV en Vivo) */
+.lcard{flex:0 0 130px;border-radius:12px;overflow:hidden;background:var(--s1);cursor:pointer;position:relative;transition:.25s;border:1.5px solid transparent;}
+.lcard:hover{border-color:var(--accent);transform:scale(1.05);}
+.lcard-thumb{width:100%;aspect-ratio:1;background:var(--s2);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.lcard-thumb img{width:70%;height:70%;object-fit:contain;}
+.lcard-thumb .lcard-emoji{font-size:38px;}
+.lcard-live{position:absolute;top:6px;left:6px;background:#EF4444;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;font-family:var(--font-mono);}
+.lcard-name{padding:8px 10px;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-display);}
+.lcard-group{padding:0 10px 8px;font-size:10px;color:var(--text3);}
+/* Card Película/Serie */
+.mcard{flex:0 0 150px;border-radius:12px;overflow:hidden;background:var(--s1);cursor:pointer;position:relative;transition:.25s;}
+.mcard:hover{transform:translateY(-5px) scale(1.03);}
+.mcard:hover .mcard-overlay{opacity:1;}
+.mcard-thumb{width:100%;aspect-ratio:2/3;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;overflow:hidden;}
+.mcard-thumb img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+.mcard-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.55);opacity:0;transition:.25s;display:flex;align-items:center;justify-content:center;}
+.mcard-play{width:44px;height:44px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;}
+.mcard-badge{position:absolute;top:7px;left:7px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;font-family:var(--font-mono);z-index:2;}
+.mcard-info{padding:9px 10px 11px;}
+.mcard-title{font-size:12px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-display);}
+.mcard-meta{font-size:10px;color:var(--text3);}
+/* Vista GRID grande */
+.grid-view-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px;}
+.grid-view-wrap.tv-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));}
+/* Tabs de vista */
+.view-tabs{display:flex;gap:6px;background:var(--s2);border-radius:10px;padding:4px;}
+.view-tab{padding:6px 14px;border-radius:7px;border:none;background:none;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:.15s;}
+.view-tab.active{background:var(--accent);color:#fff;}
+/* Cat pills rediseñadas */
+.cat-pills{display:flex;gap:8px;overflow-x:auto;padding:0 0 4px;margin-top:14px;}
+.cat-pills::-webkit-scrollbar{display:none;}
+.cat-pill{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);color:var(--text2);background:transparent;font-family:var(--font-body);transition:.2s;white-space:nowrap;flex-shrink:0;}
+.cat-pill:hover{border-color:var(--accent2);color:var(--accent2);}
+.cat-pill.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+/* Grupo label en scroll */
+.group-chip{flex:0 0 auto;padding:5px 12px;border-radius:16px;background:var(--s2);border:1px solid var(--border);font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap;transition:.15s;}
+.group-chip:hover,.group-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 .sb-section{padding:0 12px;margin-bottom:24px;}
 .sb-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;padding:0 8px;margin-bottom:8px;font-family:var(--font-mono);}
 .sb-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:.15s;width:100%;background:none;border:none;font-family:var(--font-body);text-align:left;}
@@ -1229,99 +1283,102 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
   </aside>
 
   <!-- MAIN -->
-  <main class="main">
+  <main class="main" style="padding:0;">
 
-    <!-- PAGE HEADER -->
-    <div class="page-header">
-      <div>
-        <div class="page-title">Catálogo <span id="active-genre-label"></span></div>
-        <div class="result-count" id="result-count">Cargando...</div>
+    <!-- HERO SEARCH BAR -->
+    <div class="cat-hero">
+      <div class="cat-hero-title">Tu <span>catálogo</span></div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:4px;" id="result-count">Cargando...</div>
+      <div class="cat-search-bar">
+        <span style="font-size:16px;">🔍</span>
+        <input type="text" id="search-input" placeholder="Buscar canales, películas, series..." oninput="handleSearch()">
+        <button onclick="document.getElementById('search-input').value='';handleSearch()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;">✕</button>
+      </div>
+      <!-- PILLS -->
+      <div class="cat-pills" id="genre-pills">
+        <button class="cat-pill active" onclick="filterGenre('')">🎬 Todo</button>
+        <button class="cat-pill" onclick="filterGenre('Canal')" style="border-color:#EF4444;color:#EF4444;">🔴 TV en Vivo</button>
+        <button class="cat-pill" onclick="filterGenre('Acción')">💥 Acción</button>
+        <button class="cat-pill" onclick="filterGenre('Drama')">🎭 Drama</button>
+        <button class="cat-pill" onclick="filterGenre('Sci-Fi')">🚀 Sci-Fi</button>
+        <button class="cat-pill" onclick="filterGenre('Terror')">👻 Terror</button>
+        <button class="cat-pill" onclick="filterGenre('Comedia')">😂 Comedia</button>
+        <button class="cat-pill" onclick="filterGenre('Documental')">🎥 Documental</button>
+        <button class="cat-pill" onclick="filterGenre('Animación')">✨ Animación</button>
+        <button class="cat-pill" onclick="filterGenre('Romance')">❤️ Romance</button>
+        <button class="cat-pill" onclick="filterGenre('Thriller')">🔪 Thriller</button>
+      </div>
+      <!-- Vista tabs + filtros -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:10px;">
+        <div class="view-tabs">
+          <button class="view-tab active" id="tab-rows" onclick="setCatalogView('rows')">▤ Por categoría</button>
+          <button class="view-tab" id="tab-grid" onclick="setCatalogView('grid')">⊞ Grid</button>
+          <button class="view-tab" id="tab-list" onclick="setCatalogView('list')">☰ Lista</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select class="filter-select" onchange="applyFilters()" id="filter-year" style="font-size:12px;padding:6px 10px;">
+            <option value="">📅 Año</option><option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option>
+          </select>
+          <select class="filter-select" onchange="applyFilters()" id="filter-type" style="font-size:12px;padding:6px 10px;">
+            <option value="">🎬 Tipo</option><option value="Película">Película</option><option value="Serie">Serie</option><option value="Canal">TV en Vivo</option><option value="Documental">Documental</option>
+          </select>
+          <select class="filter-select" onchange="applyFilters()" id="filter-access" style="font-size:12px;padding:6px 10px;">
+            <option value="">🔓 Acceso</option><option value="GRATIS">Gratis</option><option value="PRO">Pro</option>
+          </select>
+          <select class="filter-select" id="filter-rating" style="display:none"></select>
+        </div>
       </div>
     </div>
 
-    <!-- FILTER BAR -->
-    <div class="filter-bar">
-      <select class="filter-select" onchange="applyFilters()" id="filter-year">
-        <option value="">📅 Año</option>
-        <option value="2024">2024</option>
-        <option value="2023">2023</option>
-        <option value="2022">2022</option>
-        <option value="2021">2021</option>
-      </select>
-      <select class="filter-select" onchange="applyFilters()" id="filter-rating">
-        <option value="">⭐ Rating</option>
-        <option value="9">9+ Excelente</option>
-        <option value="8">8+ Muy bueno</option>
-        <option value="7">7+ Bueno</option>
-      </select>
-      <select class="filter-select" onchange="applyFilters()" id="filter-type">
-        <option value="">🎬 Tipo</option>
-        <option value="Película">Película</option>
-        <option value="Serie">Serie</option>
-        <option value="Documental">Documental</option>
-      </select>
-      <select class="filter-select" onchange="applyFilters()" id="filter-access">
-        <option value="">🔓 Acceso</option>
-        <option value="GRATIS">Solo Gratis</option>
-        <option value="PRO">Solo Pro</option>
-      </select>
-      <div class="filter-divider"></div>
-      <button class="sort-btn" onclick="toggleSort()">
-        <span id="sort-icon">↕</span> <span id="sort-label">Relevancia</span>
-      </button>
-      <div class="filter-divider"></div>
-      <div class="view-toggle">
-        <button class="view-btn active" id="grid-btn" onclick="setView('grid')" title="Cuadrícula">⊞</button>
-        <button class="view-btn" id="list-btn" onclick="setView('list')" title="Lista">☰</button>
-      </div>
+    <!-- CONTENT AREA -->
+    <div style="padding:24px 28px;">
+      <!-- Vista filas (Magis style) -->
+      <div id="view-rows"></div>
+      <!-- Vista grid/lista -->
+      <div class="content-grid" id="content-grid" style="display:none;"></div>
+      <!-- Paginación -->
+      <div class="pagination" id="pagination"></div>
+      <!-- Label de género activo -->
+      <span id="active-genre-label" style="display:none;"></span>
     </div>
-
-    <!-- GENRE PILLS -->
-    <div class="genre-pills" id="genre-pills">
-      <button class="genre-pill active" onclick="filterGenre('')">🎬 Todo</button>
-      <button class="genre-pill" onclick="filterGenre('Canal')" style="border-color:#EF4444;color:#EF4444;">🔴 TV en Vivo</button>
-      <button class="genre-pill" onclick="filterGenre('Acción')">💥 Acción</button>
-      <button class="genre-pill" onclick="filterGenre('Drama')">🎭 Drama</button>
-      <button class="genre-pill" onclick="filterGenre('Sci-Fi')">🚀 Sci-Fi</button>
-      <button class="genre-pill" onclick="filterGenre('Terror')">👻 Terror</button>
-      <button class="genre-pill" onclick="filterGenre('Comedia')">😂 Comedia</button>
-      <button class="genre-pill" onclick="filterGenre('Documental')">🎥 Documental</button>
-      <button class="genre-pill" onclick="filterGenre('Animación')">✨ Animación</button>
-      <button class="genre-pill" onclick="filterGenre('Romance')">❤️ Romance</button>
-      <button class="genre-pill" onclick="filterGenre('Thriller')">🔪 Thriller</button>
-    </div>
-
-    <!-- GRID -->
-    <div class="content-grid" id="content-grid"></div>
-
-    <!-- PAGINATION -->
-    <div class="pagination" id="pagination"></div>
 
   </main>
 </div>
 
 <!-- PLAYER MODAL -->
 <div class="player-overlay" id="player-modal">
-  <div class="player-header">
-    <div class="player-title" id="player-title">Reproduciendo...</div>
-    <button class="player-close" onclick="closePlayer()">✕</button>
-  </div>
-  <div class="player-wrap" style="position:relative;width:100%;background:#000;flex:1;display:flex;align-items:center;justify-content:center;">
-    <!-- Poster / logo mientras carga -->
-    <div id="modal-poster" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:#000;z-index:2;">
-      <img id="modal-logo" src="" style="width:80px;height:80px;border-radius:12px;object-fit:cover;display:none;" onerror="this.style.display='none'">
-      <div id="player-emoji" style="font-size:64px;"></div>
-      <div id="player-movie-title" style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:#fff;text-align:center;padding:0 20px;"></div>
-      <div id="modal-status" style="font-size:13px;color:rgba(255,255,255,0.5);">⏳ Conectando stream...</div>
+  <!-- Header del player -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div id="modal-logo-header" style="width:36px;height:36px;border-radius:8px;overflow:hidden;background:var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <img id="modal-logo" src="" style="width:100%;height:100%;object-fit:contain;display:none;" onerror="this.style.display='none'">
+        <span id="player-emoji" style="font-size:20px;"></span>
+      </div>
+      <div>
+        <div id="player-title" style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;">Reproduciendo...</div>
+        <div id="modal-meta" style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:1px;"></div>
+      </div>
     </div>
-    <!-- Video real -->
-    <video id="modal-video" style="width:100%;max-height:70vh;background:#000;display:block;" controls playsinline></video>
-  </div>
-  <div class="player-controls" style="padding:12px 20px;">
-    <div class="ctrl-row" style="justify-content:space-between;">
-      <div id="modal-meta" style="font-size:13px;color:var(--text2);"></div>
-      <button onclick="toggleModalFullscreen()" style="background:var(--s2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:6px 14px;cursor:pointer;font-size:13px;">⛶ Pantalla completa</button>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button onclick="toggleModalFullscreen()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:600;">⛶ Pantalla completa</button>
+      <button onclick="closePlayer()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;">✕</button>
     </div>
+  </div>
+  <!-- Video -->
+  <div style="position:relative;flex:1;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+    <!-- Poster mientras carga -->
+    <div id="modal-poster" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:linear-gradient(135deg,#0d0221,#1a0545);z-index:2;">
+      <div style="width:100px;height:100px;border-radius:20px;overflow:hidden;background:var(--s2);display:flex;align-items:center;justify-content:center;">
+        <img id="modal-poster-logo" src="" style="width:80%;height:80%;object-fit:contain;display:none;" onerror="this.style.display='none'">
+        <span id="player-movie-title-emoji" style="font-size:52px;"></span>
+      </div>
+      <div id="player-movie-title" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;text-align:center;padding:0 32px;max-width:600px;"></div>
+      <div id="modal-status" style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.5);">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse-dot 1.5s infinite;"></span>
+        Conectando stream...
+      </div>
+    </div>
+    <video id="modal-video" style="width:100%;height:100%;background:#000;display:block;object-fit:contain;" controls playsinline></video>
   </div>
 </div>
 
@@ -2386,42 +2443,164 @@ var allContent = window.allContent || [];
 
 var filtered = (window.allContent || []).slice();
 var currentView = 'grid';
-var currentSort = 'relevance';
-var currentGenre = '';
-var currentPage  = 1;
-var PAGE_SIZE    = 18;
+var currentSort    = 'relevance';
+var currentGenre   = '';
+var currentPage    = 1;
+var PAGE_SIZE      = 24;
+var catalogView    = 'rows'; // 'rows' | 'grid' | 'list'
 var myList = [];
 var isPlaying = true;
 var progressInterval;
 var currentProgress = 35;
 
-// ── RENDER ────────────────────────────────────────
+// ── RENDER PRINCIPAL ─────────────────────────────
 function renderGrid(){
-  // Safety guard
   if(typeof filtered === 'undefined') filtered = [];
   if(typeof allContent === 'undefined') allContent = [];
   if(window.allContent && window.allContent.length > 0) allContent = window.allContent;
-
-  var grid = document.getElementById('content-grid');
   var count = document.getElementById('result-count');
   if(!filtered.length){
-    if(!allContent.length){
-      // Firebase aún no ha cargado
-      grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon" style="animation:spin 1s linear infinite;display:inline-block">⏳</div><div class="empty-title">Cargando catálogo...</div><div class="empty-sub">Conectando con el servidor, un momento</div></div>';
-      count.textContent = 'Cargando...';
-    } else {
-      grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🔍</div><div class="empty-title">Sin resultados</div><div class="empty-sub">Intenta con otros filtros o términos de búsqueda</div></div>';
-      count.textContent = '0 títulos encontrados';
-    }
+    var msg = !allContent.length ? '⏳ Cargando catálogo...' : '0 títulos encontrados';
+    if(count) count.textContent = msg;
+    var viewRows = document.getElementById('view-rows');
+    var grid = document.getElementById('content-grid');
+    if(viewRows) viewRows.innerHTML = '<div style="padding:60px;text-align:center;color:var(--text2);font-size:15px;">'+(allContent.length?'🔍 Sin resultados — prueba otros filtros':'⏳ Conectando con el servidor...')+'</div>';
+    if(grid) grid.innerHTML = '';
     document.getElementById('pagination').innerHTML='';
     return;
   }
-  count.textContent = filtered.length + ' título' + (filtered.length!==1?'s':'') + ' encontrado' + (filtered.length!==1?'s':'');
-  if(currentView==='list') grid.classList.add('list-view');
-  else grid.classList.remove('list-view');
-  var start = (currentPage-1)*PAGE_SIZE;
-  grid.innerHTML = filtered.slice(start, start+PAGE_SIZE).map(makeCard).join('');
+  if(count) count.textContent = filtered.length.toLocaleString() + ' título' + (filtered.length!==1?'s':'') + ' encontrado' + (filtered.length!==1?'s':'');
+  if(catalogView === 'rows'){
+    renderRowsView();
+    document.getElementById('view-rows').style.display='';
+    document.getElementById('content-grid').style.display='none';
+    document.getElementById('pagination').innerHTML='';
+  } else {
+    renderFlatView();
+    document.getElementById('view-rows').style.display='none';
+    document.getElementById('content-grid').style.display='';
+  }
+}
+
+// Vista filas por categoría (Magis style)
+function renderRowsView(){
+  var rows = document.getElementById('view-rows');
+  if(!rows) return;
+  // Agrupar por género/grupo
+  var groups = {};
+  filtered.forEach(function(item){
+    var key = item.genre || item.group || 'General';
+    if(!groups[key]) groups[key]=[];
+    groups[key].push(item);
+  });
+  // Ordenar: TV en Vivo primero, luego alfabético
+  var keys = Object.keys(groups).sort(function(a,b){
+    if(a==='Canal'||a==='TV en vivo') return -1;
+    if(b==='Canal'||b==='TV en vivo') return 1;
+    return a.localeCompare(b);
+  });
+  // Si hay canales, poner primero fila de TV en Vivo
+  var liveItems = filtered.filter(function(c){ return c.type==='Canal'||c.m3uType==='live'; });
+  var html = '';
+  if(liveItems.length && !currentGenre){
+    html += makeRow('🔴 TV en Vivo', liveItems, 'live');
+  }
+  // Resto de grupos (sin canales si ya se mostraron)
+  keys.forEach(function(key){
+    var items = groups[key].filter(function(c){ return c.type!=='Canal'&&c.m3uType!=='live'; });
+    if(items.length) html += makeRow(key, items, 'movie');
+  });
+  if(!html) html = '<div style="padding:40px;text-align:center;color:var(--text2);">🔍 Sin resultados</div>';
+  rows.innerHTML = html;
+}
+
+function makeRow(title, items, kind){
+  var cards = items.slice(0,20).map(function(item){
+    return kind==='live' ? makeLCard(item) : makeMCard(item);
+  }).join('');
+  var total = items.length;
+  return '<div class="cat-row">'
+    +'<div class="cat-row-header">'
+      +'<div class="cat-row-title">'+title+' <span style="font-size:12px;color:var(--text3);font-weight:400;">('+total+')</span></div>'
+      +(total>20?'<button class="cat-row-see-all" onclick="filterGenre(''+title+'')">Ver todos →</button>':'')
+    +'</div>'
+    +'<div class="cat-scroll">'+cards+'</div>'
+  +'</div>';
+}
+
+// Card TV en Vivo (cuadrada con logo)
+function makeLCard(item){
+  var thumb = item.logo
+    ? '<img src="'+item.logo+'" onerror="this.style.display='none';this.nextSibling.style.display='flex'" style="width:65%;height:65%;object-fit:contain;position:relative;z-index:1;"><span class="lcard-emoji" style="display:none;font-size:38px;position:relative;z-index:1;">'+item.emoji+'</span>'
+    : '<span class="lcard-emoji" style="font-size:38px;position:relative;z-index:1;">'+item.emoji+'</span>';
+  return '<div class="lcard" onclick="openPlayer(''+item.id+'')">'
+    +'<div class="lcard-thumb" style="background:linear-gradient(135deg,'+item.bg1+','+item.bg2+');">'
+      +'<span class="lcard-live">● EN VIVO</span>'
+      +thumb
+    +'</div>'
+    +'<div class="lcard-name">'+item.title+'</div>'
+    +'<div class="lcard-group">'+( item.genre||item.group||'TV')+'</div>'
+  +'</div>';
+}
+
+// Card Película/Serie (vertical)
+function makeMCard(item){
+  var thumb = item.logo
+    ? '<img src="'+item.logo+'" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">'
+    : '<span style="font-size:44px;position:relative;z-index:1;">'+item.emoji+'</span>';
+  return '<div class="mcard" onclick="openPlayer(''+item.id+'')">'
+    +'<div class="mcard-thumb" style="background:linear-gradient(135deg,'+item.bg1+','+item.bg2+');">'
+      +thumb
+      +'<div class="mcard-overlay"><div class="mcard-play">▶</div></div>'
+      +'<div class="mcard-badge '+(item.badge==='GRATIS'?'badge-free':item.badge==='NUEVO'?'badge-new':'badge-pro')+'">'+item.badge+'</div>'
+    +'</div>'
+    +'<div class="mcard-info">'
+      +'<div class="mcard-title">'+item.title+'</div>'
+      +'<div class="mcard-meta">'+item.genre+' · '+item.year+'</div>'
+    +'</div>'
+  +'</div>';
+}
+
+// Vista flat grid/lista
+function renderFlatView(){
+  var grid = document.getElementById('content-grid');
+  var isLive = currentGenre==='Canal' || (filtered.length && filtered[0] && (filtered[0].type==='Canal'||filtered[0].m3uType==='live'));
+  if(catalogView==='grid'){
+    grid.className = 'grid-view-wrap'+(isLive?' tv-grid':'');
+    var start=(currentPage-1)*PAGE_SIZE;
+    grid.innerHTML = filtered.slice(start,start+PAGE_SIZE).map(function(item){
+      return isLive ? makeLCard(item) : makeMCard(item);
+    }).join('');
+  } else {
+    // Lista
+    grid.className = '';
+    grid.style.display = '';
+    var start=(currentPage-1)*PAGE_SIZE;
+    grid.innerHTML = filtered.slice(start,start+PAGE_SIZE).map(function(item){
+      return '<div style="display:flex;gap:14px;align-items:center;padding:12px 14px;background:var(--s1);border-radius:10px;cursor:pointer;margin-bottom:8px;transition:.2s;" onclick="openPlayer(''+item.id+'')" onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background='var(--s1)'">'
+        +'<div style="width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,'+item.bg1+','+item.bg2+');display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">'
+          +(item.logo?'<img src="'+item.logo+'" style="width:80%;height:80%;object-fit:contain;" onerror="this.style.display='none'">':'<span style="font-size:26px;">'+item.emoji+'</span>')
+        +'</div>'
+        +'<div style="flex:1;min-width:0;">'
+          +'<div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-display);">'+item.title+'</div>'
+          +'<div style="font-size:12px;color:var(--text2);margin-top:2px;">'+( item.genre||'')+(item.type?' · '+item.type:'')+'</div>'
+        +'</div>'
+        +'<span style="font-size:11px;background:'+(item.badge==='GRATIS'?'rgba(16,185,129,0.15)':'rgba(123,47,255,0.15)')+';color:'+(item.badge==='GRATIS'?'#10B981':'var(--accent2)')+';padding:3px 10px;border-radius:6px;font-weight:700;font-family:var(--font-mono);">'+item.badge+'</span>'
+        +'<button style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">▶ Ver</button>'
+      +'</div>';
+    }).join('');
+  }
   renderPagination();
+}
+
+function setCatalogView(v){
+  catalogView = v;
+  ['rows','grid','list'].forEach(function(t){
+    var el = document.getElementById('tab-'+t);
+    if(el) el.classList.toggle('active', t===v);
+  });
+  currentPage = 1;
+  renderGrid();
 }
 
 function makeCard(item){
@@ -2524,16 +2703,20 @@ function applyFilters(){
 }
 
 function filterGenre(genre){
-  currentGenre=genre;
-  document.querySelectorAll('.genre-pill').forEach(function(p){p.classList.remove('active');});
+  currentGenre = genre;
+  currentPage  = 1;
+  // Pills del catálogo nuevo
+  document.querySelectorAll('.cat-pill,.genre-pill').forEach(function(p){p.classList.remove('active');});
   if(!genre){
-    document.querySelector('.genre-pill').classList.add('active');
-    document.getElementById('active-genre-label').textContent='';
+    var first = document.querySelector('.cat-pill,.genre-pill');
+    if(first) first.classList.add('active');
   } else {
-    var pills=document.querySelectorAll('.genre-pill');
-    pills.forEach(function(p){if((p.textContent||'').includes(genre==='Canal'?'TV en Vivo':genre))p.classList.add('active');});
-    document.getElementById('active-genre-label').textContent = genre==='Canal' ? ' — 🔴 TV en Vivo' : ' — '+genre;
+    document.querySelectorAll('.cat-pill,.genre-pill').forEach(function(p){
+      if((p.textContent||'').includes(genre==='Canal'?'TV en Vivo':genre)) p.classList.add('active');
+    });
   }
+  // Si filtra por algo, cambiar a grid para ver todo
+  if(genre && catalogView==='rows') setCatalogView('grid');
   applyFilters();
 }
 
@@ -2588,13 +2771,20 @@ function openPlayer(id){
   document.getElementById('player-title').textContent = item.title;
   document.getElementById('player-emoji').textContent = item.emoji || '🎬';
   document.getElementById('player-movie-title').textContent = item.title;
+  document.getElementById('player-movie-title-emoji').textContent = item.emoji||'🎬';
   document.getElementById('modal-meta').textContent = (item.genre||'') + (item.year?' · '+item.year:'') + (item.type==='Canal'?' · 🔴 En vivo':'');
-  document.getElementById('modal-status').textContent = '⏳ Conectando stream...';
+  document.getElementById('modal-status').innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse-dot 1.5s infinite;display:inline-block;"></span> Conectando stream...';
 
   // Logo del canal si existe
   var logoEl = document.getElementById('modal-logo');
-  if(item.logo){ logoEl.src=item.logo; logoEl.style.display='block'; }
-  else { logoEl.style.display='none'; }
+  var logoEl2 = document.getElementById('modal-poster-logo');
+  if(item.logo){
+    logoEl.src=item.logo; logoEl.style.display='block';
+    if(logoEl2){ logoEl2.src=item.logo; logoEl2.style.display='block'; logoEl2.nextSibling&&(logoEl2.nextSibling.style.display='none'); }
+  } else {
+    logoEl.style.display='none';
+    if(logoEl2) logoEl2.style.display='none';
+  }
 
   // Mostrar poster mientras carga
   document.getElementById('modal-poster').style.display='flex';
@@ -2609,8 +2799,8 @@ function openPlayer(id){
   var url = item.stream;
 
   function onVideoReady(){
-    document.getElementById('modal-status').textContent = '✅ Conectado — reproduciendo';
-    setTimeout(function(){ document.getElementById('modal-poster').style.display='none'; }, 800);
+    document.getElementById('modal-status').innerHTML = '<span style="color:#10B981;">✅</span> Conectado';
+    setTimeout(function(){ document.getElementById('modal-poster').style.display='none'; }, 600);
     video.play().catch(function(e){ console.warn('Autoplay bloqueado:', e.message); });
   }
 
