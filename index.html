@@ -2726,9 +2726,12 @@ function init(){
 }
 
 function loadMovie(movie){
+  if(!movie) return;
   currentMovie = movie;
   document.title = movie.title + ' — StreamVibe';
-  document.getElementById('nav-movie-title').textContent = movie.title;
+  var _el = function(id){ return document.getElementById(id); };
+  if(!_el('nav-movie-title')) return; // player no está en el DOM
+  _el('nav-movie-title').textContent = movie.title;
   document.getElementById('poster-emoji').textContent = movie.emoji;
   document.getElementById('poster-title').textContent = movie.title;
   document.getElementById('poster-meta').textContent = movie.type + ' · ' + movie.year + ' · ⭐ ' + movie.rating + ' · ' + movie.duration;
@@ -3158,8 +3161,8 @@ document.addEventListener('keydown', function(e){
   }
 });
 
-// Init
-init();
+// Init — solo ejecutar si los elementos del player están en el DOM
+if(document.getElementById('nav-movie-title')) init();
 
 // ─── AUTH ───────────────────────────
 // ══════════════════════════════════════════════════
