@@ -1993,17 +1993,22 @@ function initPlayer(movieId) {
 }
 
 function initAuth(mode) {
-  if (mode === 'profile') {
-    // Check if logged in
-    var user = _auth ? _auth.currentUser : null;
-    if (user && typeof showProfile === 'function') {
-      showProfile(user);
-    } else {
-      if (typeof switchTab === 'function') switchTab('login');
-    }
+  // Check if user is already logged in
+  var currentUser = _auth ? _auth.currentUser : null;
+
+  if (currentUser) {
+    // User already logged in — show profile directly
+    if (typeof showProfile === 'function') showProfile(currentUser);
     return;
   }
-  // Reset profile page visibility
+
+  if (mode === 'profile') {
+    // Not logged in — redirect to login
+    if (typeof switchTab === 'function') switchTab('login');
+    return;
+  }
+
+  // Reset auth form
   var pp = document.getElementById('profile-page');
   var al = document.getElementById('auth-left');
   var ar = document.getElementById('auth-right');
@@ -2056,12 +2061,12 @@ window.openModal = function(type) {
 
 // ── FIREBASE CONFIG ───────────────────────────────
 var FIREBASE_CONFIG = {
-  apiKey:            "TU_API_KEY",
-  authDomain:        "TU_PROJECT.firebaseapp.com",
-  projectId:         "TU_PROJECT_ID",
-  storageBucket:     "TU_PROJECT.appspot.com",
-  messagingSenderId: "TU_SENDER_ID",
-  appId:             "TU_APP_ID"
+  apiKey:            "AIzaSyAzOoK99y6L95sFAKZFZ0wY42Ljw2YEOM8",
+  authDomain:        "globalacce-37997.firebaseapp.com",
+  projectId:         "globalacce-37997",
+  storageBucket:     "globalacce-37997.appspot.com",
+  messagingSenderId: "779307465490",
+  appId:             "1:779307465490:web:848a554272501bbaf251cb"
 };
 
 var STRIPE_KEY = 'pk_test_TU_CLAVE_PUBLICA_AQUI';
@@ -2080,27 +2085,42 @@ function initFirebase() {
       var guestEl = document.getElementById('nav-guest');
       var userEl  = document.getElementById('nav-user');
       if (user) {
+        // Update nav
         if (guestEl) guestEl.style.display = 'none';
         if (userEl)  { userEl.style.display = 'flex'; }
         var av = document.getElementById('nav-avatar');
         if (av) av.textContent = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
-        // Cuentas con acceso Pro automático (administradores)
+
+        // Cuentas Premium automáticas
         var PRO_ACCOUNTS = ['jhonpobre97@gmail.com'];
         if (PRO_ACCOUNTS.indexOf(user.email) !== -1) {
-          user._svPlan = 'Premium';
-          // Desbloquear todo el contenido
           window._userPlan = 'premium';
           var proBtn = document.querySelector('.spa-btn-accent');
-          if(proBtn){ proBtn.textContent='⭐ Premium'; proBtn.style.background='linear-gradient(135deg,#FF6B35,#ff9a5c)'; }
+          if(proBtn){
+            proBtn.textContent = '⭐ Premium';
+            proBtn.style.background = 'linear-gradient(135deg,#FF6B35,#ff9a5c)';
+          }
         } else {
           window._userPlan = 'free';
         }
-        // If currently on auth page, show profile
-        if (_currentPage === 'auth' && typeof showProfile === 'function') showProfile(user);
+
+        // If on auth page show profile, if on landing stay on landing
+        if (_currentPage === 'auth' && typeof showProfile === 'function') {
+          showProfile(user);
+        }
+        // If on landing and just logged in, stay on landing (don't redirect)
+
       } else {
+        // Logged out
         if (guestEl) guestEl.style.display = '';
         if (userEl)  userEl.style.display = 'none';
-        // If on auth page, show login form
+        window._userPlan = 'free';
+        // Restore nav button
+        var proBtn = document.querySelector('.spa-btn-accent');
+        if(proBtn){
+          proBtn.textContent = 'Empezar gratis';
+          proBtn.style.background = '';
+        }
         if (_currentPage === 'auth') {
           var pp = document.getElementById('profile-page');
           if(pp) pp.style.display = 'none';
@@ -3110,6 +3130,15 @@ function showProfile(user){
   var authRight = document.getElementById('auth-right');
   if(authLeft)  authLeft.style.display  = 'none';
   if(authRight) authRight.style.display = 'none';
+  // Fix plan badge
+  var planEl = document.getElementById('p-plan');
+  var PRO_ACCOUNTS = ['jhonpobre97@gmail.com'];
+  if(planEl && PRO_ACCOUNTS.indexOf(user.email) !== -1){
+    planEl.textContent = 'PREMIUM Plan';
+    planEl.style.background = 'rgba(255,107,53,0.2)';
+    planEl.style.borderColor = 'rgba(255,107,53,0.4)';
+    planEl.style.color = '#FF6B35';
+  }
 
   var initials = (user.displayName||user.email||'U').charAt(0).toUpperCase();
   document.getElementById('p-avatar').textContent = initials;
@@ -3140,7 +3169,8 @@ function signInWithGoogle(){
   var provider = new firebase.auth.GoogleAuthProvider();
   provider.addScope('email');
   provider.addScope('profile');
-  auth.signInWithPopup(provider)
+  var _ag = window._auth || window.auth;
+  _ag.signInWithPopup(provider)
     .then(function(result){
       var user = result.user;
       var isNew = result.additionalUserInfo.isNewUser;
@@ -3155,7 +3185,8 @@ function signInWithGoogle(){
 
 // ── EMAIL LOGIN ───────────────────────────────────
 function doLogin(){
-  if(!auth){ demoLogin(); return; }
+  var _a = window._auth || window.auth;
+  if(!_a){ demoLogin(); return; }
   var email = document.getElementById('login-email').value.trim();
   var pass  = document.getElementById('login-pass').value;
   var valid = true;
@@ -3163,9 +3194,13 @@ function doLogin(){
   if(!pass){ showFieldErr('login-pass','Ingresa tu contraseña'); valid=false; }
   if(!valid) return;
   setLoading('login', true);
-  auth.signInWithEmailAndPassword(email, pass)
+  var _a2 = window._auth || window.auth;
+  _a2.signInWithEmailAndPassword(email, pass)
     .then(function(result){
-      showToast('✅ ¡Bienvenido de vuelta!','success');
+      setLoading('login', false);
+      showToast('✅ ¡Bienvenido de vuelta, '+result.user.email+'!');
+      // Navigate to catalog after login
+      setTimeout(function(){ navigate('catalog'); }, 800);
     })
     .catch(function(err){
       setLoading('login', false);
@@ -3189,7 +3224,8 @@ function doRegister(){
   if(!terms){ showToast('⚠️ Acepta los términos para continuar','warning'); valid=false; }
   if(!valid) return;
   setLoading('register', true);
-  auth.createUserWithEmailAndPassword(email, pass)
+  var _ar = window._auth || window.auth;
+  _ar.createUserWithEmailAndPassword(email, pass)
     .then(function(result){
       var user = result.user;
       return user.updateProfile({displayName: name}).then(function(){
@@ -3224,10 +3260,10 @@ function doForgotPassword(){
 
 // ── SIGN OUT ──────────────────────────────────────
 function doSignOut(){
-  var _a = window.auth || window._auth;
+  var _a = window._auth || window.auth;
   if(!_a){ navigate('landing'); return; }
   _a.signOut().then(function(){
-    showToast('👋 Sesión cerrada correctamente');
+    showToast('👋 Sesión cerrada');
     navigate('landing');
   });
 }
