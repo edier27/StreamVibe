@@ -3198,20 +3198,18 @@ function initFirebaseAuth(){
 
 function onAuthStateChanged(user){
   if(user){
-    showProfile(user);
-  } else {
-    // Solo redirigir al login si el usuario está explícitamente en la página de auth
-    // No redirigir desde catálogo, landing, etc.
+    // Solo mostrar perfil si está en la página de auth
     if(window._currentPage === 'auth'){
-      showAuthForm();
+      showProfile(user);
     }
   }
+  // Si no hay sesión: no hacer nada — el catálogo es público
 }
 
 // ── AUTH STATE UI ─────────────────────────────────
 function showProfile(user){
-  // In SPA mode, navigate to auth page and show profile
-  if(typeof navigate === 'function'){
+  // Solo navegar a auth/profile si estamos en la página de auth
+  if(typeof navigate === 'function' && window._currentPage === 'auth'){
     navigate('auth', 'profile');
   }
   var pp = document.getElementById('profile-page');
