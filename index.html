@@ -1926,6 +1926,10 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
 
 var _currentPage = 'landing';
 var _pageHistory = [];
+// Global content arrays — se llenan desde Firebase
+window.allContent = window.allContent || [];
+window.filtered   = window.filtered   || [];
+window._userPlan  = window._userPlan  || 'free';
 
 // Pages config
 var PAGE_CONFIG = {
@@ -1975,6 +1979,12 @@ function goBack() {
 
 function initLanding() {
   if (typeof renderCarousels === 'function') renderCarousels();
+  // Si Firebase tarda, refrescar en 2 segundos
+  setTimeout(function(){
+    if(window.allContent && window.allContent.length > 0 && typeof renderCarousels === 'function'){
+      renderCarousels();
+    }
+  }, 2000);
 }
 
 function initCatalog(genre) {
@@ -2140,10 +2150,10 @@ function initFirebase() {
     window.db   = _db;
     console.log('[StreamVibe] Firebase listo');
 
-    // Cargar contenido desde Firebase (sv_content)
-    _db.collection('sv_content').where('active','==',true).onSnapshot(function(snap){
+    // Cargar contenido desde Firebase (sv_content) — sin filtro para evitar índices
+    _db.collection('sv_content').onSnapshot(function(snap){
       if(!snap.empty){
-        var fbContent = snap.docs.map(function(d){
+        var fbContent = snap.docs.filter(function(d){ return d.data().active !== false; }).map(function(d){
           var data = d.data();
           return {
             id:       parseInt(d.id)||Math.floor(Math.random()*9000+1000),
@@ -2177,7 +2187,7 @@ function initFirebase() {
     });
 
     // Cargar canales IPTV
-    _db.collection('sv_iptv').where('active','==',true).onSnapshot(function(snap){
+    _db.collection('sv_iptv').onSnapshot(function(snap){
       if(!snap.empty){
         var channels = snap.docs.map(function(d){
           var data = d.data();
@@ -2269,13 +2279,17 @@ function makeCard(item){
 
 // Populate carousels
 function renderCarousels(){
-  // Usar contenido de Firebase si está disponible, sino usar demo
-  var data = (window.allContent && window.allContent.length > 0) ? window.allContent : allContent;
+  // Usar contenido de Firebase si está disponible, sino usar demo hardcoded
+  var data = [];
+  if(window.allContent && window.allContent.length > 0) data = window.allContent;
+  else if(typeof allContent !== 'undefined' && allContent && allContent.length > 0) data = allContent;
+  if(!data.length) return; // No hay datos aún, esperar Firebase
+
   var trending = document.getElementById('carousel-trending');
   var cont     = document.getElementById('carousel-continue');
   var free     = document.getElementById('carousel-free');
   if(trending) trending.innerHTML = data.slice(0,12).map(makeCard).join('');
-  if(cont)     cont.innerHTML     = data.slice(2).concat(data.slice(0,2)).slice(0,12).map(makeCard).join('');
+  if(cont)     cont.innerHTML     = data.slice(0,12).map(makeCard).join('');
   if(free)     free.innerHTML     = data.filter(function(c){return c.badge==='GRATIS';}).slice(0,12).map(makeCard).join('');
 }
 renderCarousels();
@@ -2359,6 +2373,11 @@ var currentProgress = 35;
 
 // ── RENDER ────────────────────────────────────────
 function renderGrid(){
+  // Safety guard
+  if(typeof filtered === 'undefined') filtered = [];
+  if(typeof allContent === 'undefined') allContent = [];
+  if(window.allContent && window.allContent.length > 0) allContent = window.allContent;
+
   var grid = document.getElementById('content-grid');
   var count = document.getElementById('result-count');
   if(!filtered.length){
@@ -2434,6 +2453,11 @@ function renderPagination(){
 
 // ── FILTERS ──────────────────────────────────────
 function applyFilters(){
+  // Safety guards
+  if(typeof allContent === 'undefined') allContent = [];
+  if(typeof filtered === 'undefined') filtered = [];
+  if(window.allContent && window.allContent.length > 0) allContent = window.allContent;
+
   var year   = document.getElementById('filter-year').value;
   var rating = document.getElementById('filter-rating').value;
   var type   = document.getElementById('filter-type').value;
