@@ -442,31 +442,51 @@ function loadM3U(){
   showProgress('Descargando lista M3U...');
   setProgress(10);
 
-  // Use CORS proxy to fetch M3U
-  var proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(url);
+  // Try multiple CORS proxies
+  var proxies = [
+    'https://corsproxy.io/?' + encodeURIComponent(url),
+    'https://api.allorigins.win/get?url=' + encodeURIComponent(url),
+    'https://cors-anywhere.herokuapp.com/' + url,
+    'https://thingproxy.freeboard.io/fetch/' + url,
+  ];
+  var proxyIdx = 0;
 
-  fetch(proxyUrl)
-    .then(function(r){
-      if(!r.ok) throw new Error('Error HTTP '+r.status);
-      return r.text();
-    })
-    .then(function(text){
-      setProgress(40);
-      log('✅ Lista descargada — '+text.length+' bytes');
-      parseM3U(text);
-    })
-    .catch(function(e){
-      // Try alternate proxy
-      log('⚠️ Proxy 1 falló, probando alternativo...');
-      return fetch('https://api.allorigins.win/get?url='+encodeURIComponent(url))
-        .then(function(r){ return r.json(); })
-        .then(function(data){ parseM3U(data.contents); })
-        .catch(function(e2){
-          hideProgress();
-          showToast('❌ No se pudo cargar la lista. Verifica el URL.');
-          log('❌ Error: '+e2.message);
-        });
-    });
+  function tryProxy(){
+    if(proxyIdx >= proxies.length){
+      hideProgress();
+      showToast('❌ No se pudo cargar. Intenta descargar el archivo .m3u y arrastrarlo aquí.');
+      log('❌ Todos los proxies fallaron');
+      log('💡 Tip: Descarga el archivo .m3u y arrástralo al panel');
+      return;
+    }
+    var proxyUrl = proxies[proxyIdx];
+    log('🔄 Intentando proxy '+(proxyIdx+1)+'...');
+    proxyIdx++;
+
+    fetch(proxyUrl)
+      .then(function(r){
+        if(!r.ok) throw new Error('HTTP '+r.status);
+        // allorigins returns JSON
+        if(proxyUrl.includes('allorigins')){
+          return r.json().then(function(d){
+            if(!d.contents) throw new Error('Sin contenido');
+            return d.contents;
+          });
+        }
+        return r.text();
+      })
+      .then(function(text){
+        if(!text || text.length < 10) throw new Error('Respuesta vacía');
+        setProgress(40);
+        log('✅ Lista descargada — '+text.length+' bytes');
+        parseM3U(text);
+      })
+      .catch(function(e){
+        log('⚠️ Proxy '+(proxyIdx)+' falló: '+e.message);
+        tryProxy();
+      });
+  }
+  tryProxy();
 }
 
 function handleDrop(event){
