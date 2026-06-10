@@ -2115,6 +2115,74 @@ function initFirebase() {
     window.auth = _auth;
     window.db   = _db;
     console.log('[StreamVibe] Firebase listo');
+
+    // Cargar contenido desde Firebase (sv_content)
+    _db.collection('sv_content').where('active','==',true).onSnapshot(function(snap){
+      if(!snap.empty){
+        var fbContent = snap.docs.map(function(d){
+          var data = d.data();
+          return {
+            id:       parseInt(d.id)||Math.floor(Math.random()*9000+1000),
+            fbId:     d.id,
+            title:    data.title||'Sin título',
+            genre:    data.genre||'Acción',
+            type:     data.type||'Película',
+            year:     data.year||2024,
+            rating:   data.rating||8.0,
+            badge:    data.access||'GRATIS',
+            desc:     data.desc||'',
+            emoji:    data.emoji||'🎬',
+            bg1:      data.bg1||'#0d0221',
+            bg2:      data.bg2||'#1a0545',
+            duration: data.duration||'',
+            stream:   data.stream||''
+          };
+        });
+        // Merge with existing content or replace
+        if(fbContent.length > 0){
+          window.allContent = fbContent;
+          window.filtered   = fbContent.slice();
+          if(typeof renderGrid === 'function' && typeof renderCarousels === 'function'){
+            renderCarousels();
+            if(window._currentPage === 'catalog') renderGrid();
+          }
+          console.log('[StreamVibe] '+fbContent.length+' títulos cargados desde Firebase');
+        }
+      }
+    });
+
+    // Cargar canales IPTV
+    _db.collection('sv_iptv').where('active','==',true).onSnapshot(function(snap){
+      if(!snap.empty){
+        var channels = snap.docs.map(function(d){
+          var data = d.data();
+          return {
+            id:       'iptv-'+d.id,
+            fbId:     d.id,
+            title:    data.name||'Canal',
+            genre:    data.category||'TV',
+            type:     'Canal',
+            year:     2024,
+            rating:   8.0,
+            badge:    data.access||'GRATIS',
+            desc:     'Canal en vivo · '+data.country,
+            emoji:    data.emoji||'📺',
+            bg1:      '#000a1a',
+            bg2:      '#00153a',
+            duration: 'En vivo 🔴',
+            stream:   data.url||''
+          };
+        });
+        // Add channels to content
+        if(channels.length > 0){
+          var existing = (window.allContent||[]).filter(function(c){ return c.type !== 'Canal'; });
+          window.allContent = existing.concat(channels);
+          window.filtered   = window.allContent.slice();
+          if(typeof renderGrid === 'function' && window._currentPage === 'catalog') renderGrid();
+          console.log('[StreamVibe] '+channels.length+' canales IPTV cargados');
+        }
+      }
+    });
   } catch(e) {
     console.warn('[StreamVibe] Firebase modo demo:', e.message);
   }
