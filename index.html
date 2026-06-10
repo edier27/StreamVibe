@@ -3200,7 +3200,11 @@ function onAuthStateChanged(user){
   if(user){
     showProfile(user);
   } else {
-    showAuthForm();
+    // Solo redirigir al login si el usuario está explícitamente en la página de auth
+    // No redirigir desde catálogo, landing, etc.
+    if(window._currentPage === 'auth'){
+      showAuthForm();
+    }
   }
 }
 
