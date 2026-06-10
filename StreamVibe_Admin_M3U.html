@@ -194,6 +194,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-hei
       <div class="ph">
         <div class="pt">📡 Lista <span>M3U</span></div>
         <div style="display:flex;gap:10px;">
+          <button class="btn btn-s btn-sm" onclick="loadFromFirebase()" title="Recargar datos guardados en Firebase">🔄 Recargar</button>
           <button class="btn btn-s btn-sm" onclick="clearAll()">🗑️ Limpiar todo</button>
           <button class="btn btn-p" id="btn-sync" onclick="syncToFirebase()" disabled>☁️ Publicar en StreamVibe</button>
         </div>
@@ -428,10 +429,74 @@ function initFB(){
   try{
     var app = firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
     db = app.firestore();
-    log('✅ Firebase conectado — listo para publicar');
+    log('✅ Firebase conectado — cargando contenido guardado...');
+    loadFromFirebase();
   }catch(e){
     log('⚠️ Firebase no disponible: '+e.message);
   }
+}
+
+// ── CARGAR DATOS GUARDADOS DESDE FIREBASE ─────────
+function loadFromFirebase(){
+  if(!db){ log('⚠️ Firebase no listo'); return; }
+  log('📥 Restaurando lista desde Firebase...');
+  db.collection('sv_content').limit(500).get().then(function(snap){
+    if(snap.empty){
+      log('ℹ️ No hay contenido guardado en Firebase todavía.');
+      return;
+    }
+    var typeMap = {'Película':'movie','Serie':'series','Canal':'live','Documental':'other'};
+    _items = snap.docs.map(function(d){
+      var data = d.data();
+      var m3uType = data.m3uType || typeMap[data.type] || 'other';
+      return {
+        title:   data.title||'',
+        group:   data.group||data.genre||'',
+        logo:    data.logo||'',
+        tvgId:   data.tvgId||'',
+        duration: -1,
+        type:    m3uType,
+        url:     data.stream||'',
+        access:  data.access||'GRATIS',
+        fbId:    d.id,
+        _fromFB: true
+      };
+    });
+    _movies = _items.filter(function(i){ return i.type==='movie'; });
+    _series = _items.filter(function(i){ return i.type==='series'; });
+    _live   = _items.filter(function(i){ return i.type==='live'; });
+    _docs   = _items.filter(function(i){ return i.type==='other'; });
+
+    updateCounters();
+    renderPreview();
+    renderAllTables();
+    document.getElementById('btn-sync').disabled = false;
+
+    // Guardar también en localStorage como caché de respaldo
+    try{ localStorage.setItem('sv_items_cache', JSON.stringify(_items.slice(0, 200))); }catch(e){}
+
+    log('✅ '+_items.length+' elementos restaurados desde Firebase ('+_movies.length+' películas, '+_series.length+' series, '+_live.length+' canales)');
+    showToast('📥 '+_items.length+' elementos restaurados desde Firebase');
+  }).catch(function(e){
+    log('⚠️ Error al cargar desde Firebase: '+e.message);
+    // Intentar con caché localStorage
+    try{
+      var cached = localStorage.getItem('sv_items_cache');
+      if(cached){
+        _items = JSON.parse(cached);
+        _movies = _items.filter(function(i){ return i.type==='movie'; });
+        _series = _items.filter(function(i){ return i.type==='series'; });
+        _live   = _items.filter(function(i){ return i.type==='live'; });
+        _docs   = _items.filter(function(i){ return i.type==='other'; });
+        updateCounters();
+        renderPreview();
+        renderAllTables();
+        document.getElementById('btn-sync').disabled = false;
+        log('💾 '+_items.length+' elementos restaurados desde caché local');
+        showToast('💾 Datos restaurados desde caché local');
+      }
+    }catch(ce){ log('❌ Sin caché local disponible'); }
+  });
 }
 
 // ── M3U PARSER ────────────────────────────────────
@@ -821,6 +886,8 @@ function syncToFirebase(){
 
           showToast('🎉 ¡'+total+' elementos publicados en StreamVibe!');
           log('🎉 Sincronización completada — '+total+' elementos en Firebase');
+          // Actualizar caché local
+          try{ localStorage.setItem('sv_items_cache', JSON.stringify(_items.slice(0,200))); }catch(e){}
         }
       })
       .catch(function(e){
@@ -849,14 +916,15 @@ function syncToFirebase(){
 
 function clearAll(){
   if(!_items.length){ showToast('No hay contenido cargado'); return; }
-  if(!confirm('¿Limpiar toda la lista cargada?')) return;
+  if(!confirm('¿Limpiar toda la lista cargada?\n\nEsto solo limpia la vista local, no borra lo publicado en Firebase.')) return;
   _items=[]; _movies=[]; _series=[]; _live=[]; _docs=[];
   document.getElementById('preview-card').style.display='none';
   document.getElementById('stats-row').style.display='none';
   document.getElementById('btn-sync').disabled=true;
   updateCounters();
   renderAllTables();
-  showToast('🗑️ Lista limpiada');
+  try{ localStorage.removeItem('sv_items_cache'); }catch(e){}
+  showToast('🗑️ Lista limpiada localmente');
 }
 
 // ── SETTINGS ──────────────────────────────────────
