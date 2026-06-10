@@ -2503,11 +2503,12 @@ function applyFilters(){
   if(typeof filtered === 'undefined') filtered = [];
   if(window.allContent && window.allContent.length > 0) allContent = window.allContent;
 
-  var year   = document.getElementById('filter-year').value;
-  var rating = document.getElementById('filter-rating').value;
-  var type   = document.getElementById('filter-type').value;
-  var access = document.getElementById('filter-access').value;
-  var search = document.getElementById('search-input').value.toLowerCase().trim();
+  var _v = function(id){ var el=document.getElementById(id); return el?el.value:''; };
+  var year   = _v('filter-year');
+  var rating = _v('filter-rating');
+  var type   = _v('filter-type');
+  var access = _v('filter-access');
+  var search = _v('search-input').toLowerCase().trim();
   // Sincronizar con Firebase
   if(window.allContent && window.allContent.length > 0) allContent = window.allContent;
   filtered = allContent.filter(function(c){
