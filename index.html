@@ -3189,7 +3189,7 @@ if(document.getElementById('nav-movie-title')) init();
 var auth = null;
 var db   = null;
 
-function initFirebase(){
+function initFirebaseAuth(){
   // Usar Firebase ya inicializado por el SPA router
   if(window._auth){ auth = window._auth; window.auth = window._auth; }
   if(window._db)  { db   = window._db;   window.db   = window._db; }
@@ -3499,11 +3499,11 @@ function showToast(msg, type){
   _tt=setTimeout(function(){t.classList.remove('show');},3500);
 }
 
-// Init
+// Init Auth
 if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',initFirebase);
+  document.addEventListener('DOMContentLoaded',initFirebaseAuth);
 }else{
-  setTimeout(initFirebase,100);
+  setTimeout(initFirebaseAuth,100);
 }
 
 // ─── PAYMENTS ───────────────────────────
