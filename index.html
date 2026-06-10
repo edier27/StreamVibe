@@ -1210,6 +1210,7 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
     <div class="sb-divider"></div>
     <div class="sb-section">
       <div class="sb-label">Categorías</div>
+      <button class="sb-item" onclick="filterGenre('Canal')"><div class="sb-ic">🔴</div> TV en Vivo</button>
       <button class="sb-item" onclick="filterGenre('Acción')"><div class="sb-ic">💥</div> Acción</button>
       <button class="sb-item" onclick="filterGenre('Drama')"><div class="sb-ic">🎭</div> Drama</button>
       <button class="sb-item" onclick="filterGenre('Sci-Fi')"><div class="sb-ic">🚀</div> Ciencia Ficción</button>
@@ -1277,6 +1278,7 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
     <!-- GENRE PILLS -->
     <div class="genre-pills" id="genre-pills">
       <button class="genre-pill active" onclick="filterGenre('')">🎬 Todo</button>
+      <button class="genre-pill" onclick="filterGenre('Canal')" style="border-color:#EF4444;color:#EF4444;">🔴 TV en Vivo</button>
       <button class="genre-pill" onclick="filterGenre('Acción')">💥 Acción</button>
       <button class="genre-pill" onclick="filterGenre('Drama')">🎭 Drama</button>
       <button class="genre-pill" onclick="filterGenre('Sci-Fi')">🚀 Sci-Fi</button>
@@ -1978,7 +1980,9 @@ function initLanding() {
 function initCatalog(genre) {
   currentGenre = genre || '';
   if (typeof renderGrid === 'function' && typeof allContent !== 'undefined') {
-    filtered = allContent.slice();
+    // Usar Firebase data si está disponible
+  if(window.allContent && window.allContent.length > 0) allContent = window.allContent;
+  filtered = allContent.slice();
     if (currentGenre) filtered = filtered.filter(function(c){ return c.genre === currentGenre; });
     renderGrid();
   }
@@ -2162,10 +2166,11 @@ function initFirebase() {
         if(fbContent.length > 0){
           window.allContent = fbContent;
           window.filtered   = fbContent.slice();
-          if(typeof renderGrid === 'function' && typeof renderCarousels === 'function'){
-            renderCarousels();
-            if(window._currentPage === 'catalog') renderGrid();
-          }
+          allContent = fbContent; // sync local variable too
+          filtered   = fbContent.slice();
+          if(typeof renderCarousels === 'function') renderCarousels();
+          if(typeof renderGrid === 'function' && window._currentPage === 'catalog') renderGrid();
+          console.log('[StreamVibe] Catálogo actualizado con '+fbContent.length+' títulos de Firebase');
           console.log('[StreamVibe] '+fbContent.length+' títulos cargados desde Firebase');
         }
       }
@@ -2264,12 +2269,14 @@ function makeCard(item){
 
 // Populate carousels
 function renderCarousels(){
+  // Usar contenido de Firebase si está disponible, sino usar demo
+  var data = (window.allContent && window.allContent.length > 0) ? window.allContent : allContent;
   var trending = document.getElementById('carousel-trending');
   var cont     = document.getElementById('carousel-continue');
   var free     = document.getElementById('carousel-free');
-  if(trending) trending.innerHTML = content.map(makeCard).join('');
-  if(cont)     cont.innerHTML     = content.slice(2).concat(content.slice(0,2)).map(makeCard).join('');
-  if(free)     free.innerHTML     = content.filter(function(c){return c.badge==='GRATIS';}).map(makeCard).join('');
+  if(trending) trending.innerHTML = data.slice(0,12).map(makeCard).join('');
+  if(cont)     cont.innerHTML     = data.slice(2).concat(data.slice(0,2)).slice(0,12).map(makeCard).join('');
+  if(free)     free.innerHTML     = data.filter(function(c){return c.badge==='GRATIS';}).slice(0,12).map(makeCard).join('');
 }
 renderCarousels();
 
@@ -2432,8 +2439,12 @@ function applyFilters(){
   var type   = document.getElementById('filter-type').value;
   var access = document.getElementById('filter-access').value;
   var search = document.getElementById('search-input').value.toLowerCase().trim();
+  // Sincronizar con Firebase
+  if(window.allContent && window.allContent.length > 0) allContent = window.allContent;
   filtered = allContent.filter(function(c){
-    if(currentGenre && c.genre!==currentGenre) return false;
+    // TV en Vivo filtra por type='Canal'
+    if(currentGenre==='Canal') return c.type==='Canal' || c.m3uType==='live';
+    if(currentGenre && currentGenre!=='Canal' && c.genre!==currentGenre) return false;
     if(year && String(c.year)!==year) return false;
     if(rating && c.rating<parseFloat(rating)) return false;
     if(type && c.type!==type) return false;
@@ -2455,8 +2466,8 @@ function filterGenre(genre){
     document.getElementById('active-genre-label').textContent='';
   } else {
     var pills=document.querySelectorAll('.genre-pill');
-    pills.forEach(function(p){if((p.textContent||'').includes(genre))p.classList.add('active');});
-    document.getElementById('active-genre-label').textContent=' — '+genre;
+    pills.forEach(function(p){if((p.textContent||'').includes(genre==='Canal'?'TV en Vivo':genre))p.classList.add('active');});
+    document.getElementById('active-genre-label').textContent = genre==='Canal' ? ' — 🔴 TV en Vivo' : ' — '+genre;
   }
   applyFilters();
 }
