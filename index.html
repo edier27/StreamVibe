@@ -2388,6 +2388,8 @@ var filtered = (window.allContent || []).slice();
 var currentView = 'grid';
 var currentSort = 'relevance';
 var currentGenre = '';
+var currentPage  = 1;
+var PAGE_SIZE    = 18;
 var myList = [];
 var isPlaying = true;
 var progressInterval;
@@ -2417,7 +2419,8 @@ function renderGrid(){
   count.textContent = filtered.length + ' título' + (filtered.length!==1?'s':'') + ' encontrado' + (filtered.length!==1?'s':'');
   if(currentView==='list') grid.classList.add('list-view');
   else grid.classList.remove('list-view');
-  grid.innerHTML = filtered.slice(0,18).map(makeCard).join('');
+  var start = (currentPage-1)*PAGE_SIZE;
+  grid.innerHTML = filtered.slice(start, start+PAGE_SIZE).map(makeCard).join('');
   renderPagination();
 }
 
@@ -2469,14 +2472,19 @@ function renderPagination(){
   var pages = Math.ceil(filtered.length / 18);
   if(pages<=1){pag.innerHTML='';return;}
   var html='<button class="page-btn">‹</button>';
-  for(var i=1;i<=Math.min(pages,5);i++) html+='<button class="page-btn'+(i===1?' active':'')+'">'+i+'</button>';
-  if(pages>5) html+='<span style="color:var(--text3);font-size:13px;">...</span><button class="page-btn">'+pages+'</button>';
+  var startP = Math.max(1, currentPage-2);
+  var endP   = Math.min(pages, startP+4);
+  for(var i=startP;i<=endP;i++) html+='<button class="page-btn'+(i===currentPage?' active':'')+'">'+i+'</button>';
+  if(endP<pages) html+='<span style="color:var(--text3);font-size:13px;">...</span><button class="page-btn">'+pages+'</button>';
   html+='<button class="page-btn">›</button>';
   pag.innerHTML=html;
   pag.querySelectorAll('.page-btn').forEach(function(b){
     b.addEventListener('click',function(){
-      pag.querySelectorAll('.page-btn').forEach(function(x){x.classList.remove('active');});
-      this.classList.add('active');
+      var txt = this.textContent.trim();
+      if(txt==='‹'){ if(currentPage>1) currentPage--; }
+      else if(txt==='›'){ if(currentPage<pages) currentPage++; }
+      else { var n=parseInt(txt); if(!isNaN(n)) currentPage=n; }
+      renderGrid();
       window.scrollTo({top:0,behavior:'smooth'});
     });
   });
@@ -2511,6 +2519,7 @@ function applyFilters(){
   if(currentSort==='rating') filtered.sort(function(a,b){return b.rating-a.rating;});
   else if(currentSort==='year') filtered.sort(function(a,b){return b.year-a.year;});
   else if(currentSort==='title') filtered.sort(function(a,b){return a.title.localeCompare(b.title);});
+  currentPage = 1;
   renderGrid();
 }
 
