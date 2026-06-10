@@ -1625,7 +1625,7 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
     </div>
     <div>
       <button class="btn-signout" onclick="doSignOut()">🚪 Cerrar sesión</button>
-      <button class="btn-go" onclick="showToast('🎬 Yendo al catálogo...')">▶ Ver ahora</button>
+      <button class="btn-go" onclick="navigate('catalog')">▶ Ver ahora</button>
     </div>
   </div>
 </div>
@@ -1977,7 +1977,7 @@ function initLanding() {
 
 function initCatalog(genre) {
   currentGenre = genre || '';
-  if (typeof renderGrid === 'function') {
+  if (typeof renderGrid === 'function' && typeof allContent !== 'undefined') {
     filtered = allContent.slice();
     if (currentGenre) filtered = filtered.filter(function(c){ return c.genre === currentGenre; });
     renderGrid();
@@ -1993,6 +1993,23 @@ function initPlayer(movieId) {
 }
 
 function initAuth(mode) {
+  if (mode === 'profile') {
+    // Check if logged in
+    var user = _auth ? _auth.currentUser : null;
+    if (user && typeof showProfile === 'function') {
+      showProfile(user);
+    } else {
+      if (typeof switchTab === 'function') switchTab('login');
+    }
+    return;
+  }
+  // Reset profile page visibility
+  var pp = document.getElementById('profile-page');
+  var al = document.getElementById('auth-left');
+  var ar = document.getElementById('auth-right');
+  if(pp) pp.style.display = 'none';
+  if(al) al.style.display = '';
+  if(ar) ar.style.display = '';
   if (typeof switchTab === 'function') switchTab(mode || 'login');
 }
 
@@ -2023,7 +2040,8 @@ window.openPlayerSPA = function(id) {
 // Override catalog card clicks
 window.openPlayer = function(id) {
   var item = allContent.find(function(c){ return c.id === id; });
-  if (item && item.badge === 'PRO') {
+  var plan = window._userPlan || 'free';
+  if (item && item.badge === 'PRO' && plan === 'free') {
     showToast('⭐ Este contenido es PRO — Actualiza tu plan');
     navigate('payments');
     return;
@@ -2066,11 +2084,31 @@ function initFirebase() {
         if (userEl)  { userEl.style.display = 'flex'; }
         var av = document.getElementById('nav-avatar');
         if (av) av.textContent = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
-        // Update profile page if visible
-        if (typeof showProfile === 'function') showProfile(user);
+        // Cuentas con acceso Pro automático (administradores)
+        var PRO_ACCOUNTS = ['jhonpobre97@gmail.com'];
+        if (PRO_ACCOUNTS.indexOf(user.email) !== -1) {
+          user._svPlan = 'Premium';
+          // Desbloquear todo el contenido
+          window._userPlan = 'premium';
+          var proBtn = document.querySelector('.spa-btn-accent');
+          if(proBtn){ proBtn.textContent='⭐ Premium'; proBtn.style.background='linear-gradient(135deg,#FF6B35,#ff9a5c)'; }
+        } else {
+          window._userPlan = 'free';
+        }
+        // If currently on auth page, show profile
+        if (_currentPage === 'auth' && typeof showProfile === 'function') showProfile(user);
       } else {
         if (guestEl) guestEl.style.display = '';
         if (userEl)  userEl.style.display = 'none';
+        // If on auth page, show login form
+        if (_currentPage === 'auth') {
+          var pp = document.getElementById('profile-page');
+          if(pp) pp.style.display = 'none';
+          var al = document.getElementById('auth-left');
+          var ar = document.getElementById('auth-right');
+          if(al) al.style.display = '';
+          if(ar) ar.style.display = '';
+        }
       }
     });
     // Make available to auth page functions
@@ -2084,13 +2122,16 @@ function initFirebase() {
 
 // ── START ─────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
-  initFirebase();
-  // Init Stripe
-  if (typeof Stripe !== 'undefined') {
-    try { window.stripe = Stripe(STRIPE_KEY); } catch(e) {}
-  }
-  // Navigate to landing
-  navigate('landing');
+  // Small delay to let all scripts initialize
+  setTimeout(function(){
+    initFirebase();
+    // Init Stripe
+    if (typeof Stripe !== 'undefined') {
+      try { window.stripe = Stripe(STRIPE_KEY); } catch(e) {}
+    }
+    // Navigate to landing
+    navigate('landing');
+  }, 50);
 });
 
 // Handle browser back button
@@ -2239,7 +2280,7 @@ function renderGrid(){
 }
 
 function makeCard(item){
-  var inList = myList.includes(item.id);
+  var inList = (myList||[]).includes(item.id);
   if(currentView==='list'){
     return '<div class="ccard" onclick="openPlayer('+item.id+')">'
       +'<div class="ccard-thumb"><div class="thumb-bg" style="background:linear-gradient(135deg,'+item.bg1+','+item.bg2+')"></div>'
@@ -2309,7 +2350,7 @@ function applyFilters(){
     if(rating && c.rating<parseFloat(rating)) return false;
     if(type && c.type!==type) return false;
     if(access && c.badge!==access) return false;
-    if(search && !c.title.toLowerCase().includes(search) && !c.genre.toLowerCase().includes(search) && !c.desc.toLowerCase().includes(search)) return false;
+    if(search && !(c.title||'').toLowerCase().includes(search) && !(c.genre||'').toLowerCase().includes(search) && !(c.desc||'').toLowerCase().includes(search)) return false;
     return true;
   });
   if(currentSort==='rating') filtered.sort(function(a,b){return b.rating-a.rating;});
@@ -2326,7 +2367,7 @@ function filterGenre(genre){
     document.getElementById('active-genre-label').textContent='';
   } else {
     var pills=document.querySelectorAll('.genre-pill');
-    pills.forEach(function(p){if(p.textContent.includes(genre))p.classList.add('active');});
+    pills.forEach(function(p){if((p.textContent||'').includes(genre))p.classList.add('active');});
     document.getElementById('active-genre-label').textContent=' — '+genre;
   }
   applyFilters();
@@ -2438,7 +2479,7 @@ document.getElementById('player-modal').addEventListener('click',function(e){
 });
 
 // Init
-renderGrid();
+if(typeof allContent !== 'undefined') renderGrid();
 
 // ─── PLAYER ───────────────────────────
 // ── MOVIE DATABASE ────────────────────────────────
@@ -2991,10 +3032,16 @@ function onAuthStateChanged(user){
 
 // ── AUTH STATE UI ─────────────────────────────────
 function showProfile(user){
-  document.getElementById('auth-left').style.display = 'none';
-  document.getElementById('auth-right').style.display = 'none';
+  // In SPA mode, navigate to auth page and show profile
+  if(typeof navigate === 'function'){
+    navigate('auth', 'profile');
+  }
   var pp = document.getElementById('profile-page');
-  pp.style.display = 'flex';
+  if(pp) pp.style.display = 'flex';
+  var authLeft  = document.getElementById('auth-left');
+  var authRight = document.getElementById('auth-right');
+  if(authLeft)  authLeft.style.display  = 'none';
+  if(authRight) authRight.style.display = 'none';
 
   var initials = (user.displayName||user.email||'U').charAt(0).toUpperCase();
   document.getElementById('p-avatar').textContent = initials;
@@ -3006,7 +3053,8 @@ function showProfile(user){
     db.collection('users').doc(user.uid).get().then(function(doc){
       if(doc.exists){
         var data = doc.data();
-        document.getElementById('p-plan').textContent = (data.plan||'gratis').toUpperCase()+' Plan';
+        var planName = user._svPlan || (data.plan||'gratis');
+        document.getElementById('p-plan').textContent = planName.toUpperCase()+' Plan';
         document.getElementById('p-list-count').textContent = (data.myList||[]).length;
       }
     });
@@ -3014,9 +3062,7 @@ function showProfile(user){
 }
 
 function showAuthForm(){
-  document.getElementById('auth-left').style.display = '';
-  document.getElementById('auth-right').style.display = '';
-  document.getElementById('profile-page').style.display = 'none';
+  navigate('auth', 'login');
 }
 
 // ── GOOGLE SIGN IN ────────────────────────────────
@@ -3110,9 +3156,11 @@ function doForgotPassword(){
 
 // ── SIGN OUT ──────────────────────────────────────
 function doSignOut(){
-  if(!auth){ showAuthForm(); return; }
-  auth.signOut().then(function(){
-    showToast('👋 Sesión cerrada correctamente','success');
+  var _a = window.auth || window._auth;
+  if(!_a){ navigate('landing'); return; }
+  _a.signOut().then(function(){
+    showToast('👋 Sesión cerrada correctamente');
+    navigate('landing');
   });
 }
 
