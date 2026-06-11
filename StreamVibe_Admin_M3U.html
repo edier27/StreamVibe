@@ -760,54 +760,57 @@ function exportCatalog(){
     var emoji = {movie:'🎬',series:'📺',live:'🔴',other:'🎥'};
     var typeMap = {movie:'Película',series:'Serie',live:'Canal',other:'Documental'};
 
-    var catalog = _items.map(function(item){
+    // Campos mínimos para reducir tamaño (~70% menos)
+    var catalog = _items.map(function(item, i){
       return {
-        id:       item.tvgId || item.title.replace(/[^a-zA-Z0-9]/g,'_').substring(0,30)+'_'+Math.random().toString(36).substr(2,5),
-        title:    item.title,
-        type:     typeMap[item.type]||'Película',
-        m3uType:  item.type,
-        genre:    item.group || typeMap[item.type] || 'General',
-        group:    item.group||'',
-        year:     2026,
-        rating:   8.0,
-        access:   item.access||'GRATIS',
-        emoji:    emoji[item.type]||'🎬',
-        logo:     item.logo||'',
-        stream:   item.url||'',
-        bg1:      '#0d0221',
-        bg2:      '#1a0545',
-        active:   true
+        i: i,
+        t: item.title,
+        tp: item.type,
+        g: item.group||'',
+        l: item.logo||'',
+        s: item.url||'',
+        a: item.access||'GRATIS'
       };
     });
 
-    setProgress(60);
-    log('📦 '+catalog.length+' elementos en catalog.json');
+    setProgress(50);
+    log('📦 '+catalog.length+' elementos — dividiendo en partes <25MB...');
 
-    var json = JSON.stringify(catalog);
-    var blob = new Blob([json], {type:'application/json'});
-    var url  = URL.createObjectURL(blob);
-    var a    = document.createElement('a');
-    a.href     = url;
-    a.download = 'catalog.json';
-    a.click();
-    URL.revokeObjectURL(url);
+    // Dividir en partes de 40,000 items (~8-10MB cada una)
+    var CHUNK = 40000;
+    var parts = [];
+    for(var p=0; p<catalog.length; p+=CHUNK){
+      parts.push(catalog.slice(p, p+CHUNK));
+    }
+    setProgress(65);
+    log('📂 '+parts.length+' archivos a descargar');
 
-    setProgress(100);
-    setTimeout(hideProgress, 800);
-    btn.disabled = false;
-    if(btnMain) btnMain.disabled = false;
-    btn.textContent = '☁️ Publicar todo en StreamVibe';
-
-    // Guardar en historial
-    var now = new Date();
-    var hist = document.getElementById('sync-history');
-    if(hist) hist.innerHTML = '<div style="padding:14px 20px;font-size:13px;color:var(--text2);">✅ <strong>'+now.toLocaleString('es-CO')+'</strong> — catalog.json descargado con '+catalog.length+' elementos</div>' + hist.innerHTML;
-
-    showToast('✅ catalog.json descargado — súbelo a tu repo de GitHub');
-    log('✅ catalog.json listo: '+catalog.length+' elementos. Súbelo a edier27.github.io/StreamVibe/catalog.json');
-
-    // Mostrar instrucciones
-    showInstructions(catalog.length);
+    function downloadPart(idx){
+      if(idx >= parts.length){
+        setProgress(100);
+        setTimeout(hideProgress, 800);
+        btn.disabled = false;
+        if(btnMain) btnMain.disabled = false;
+        btn.textContent = '☁️ Publicar todo en StreamVibe';
+        var now = new Date();
+        var hist = document.getElementById('sync-history');
+        if(hist) hist.innerHTML = '<div style="padding:14px 20px;font-size:13px;color:var(--text2);">✅ <strong>'+now.toLocaleString('es-CO')+'</strong> — '+parts.length+' archivos ('+catalog.length+' elementos)</div>'+hist.innerHTML;
+        showToast('✅ '+parts.length+' archivos descargados — súbelos a GitHub');
+        showInstructions(catalog.length, parts.length);
+        return;
+      }
+      var json = JSON.stringify(parts[idx]);
+      var blob = new Blob([json], {type:'application/json'});
+      var url  = URL.createObjectURL(blob);
+      var a    = document.createElement('a');
+      a.href = url; a.download = 'catalog_'+(idx+1)+'.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      log('📥 catalog_'+(idx+1)+'.json — '+parts[idx].length+' items');
+      setProgress(65+Math.round((idx+1)/parts.length*35));
+      setTimeout(function(){ downloadPart(idx+1); }, 1000);
+    }
+    downloadPart(0);
   }, 200);
 
 
@@ -815,7 +818,8 @@ function exportCatalog(){
 
 
 // Mostrar instrucciones después de descargar
-function showInstructions(count){
+function showInstructions(count, parts){
+  parts = parts || 1;
   var existing = document.getElementById('export-instructions');
   if(existing) existing.remove();
   var div = document.createElement('div');
@@ -825,13 +829,16 @@ function showInstructions(count){
     +'<ol style="padding-left:20px;color:#A0A0B0;">'
     +'<li>Ve a <strong>github.com/edier27/StreamVibe</strong></li>'
     +'<li>Haz clic en <strong>Add file → Upload files</strong></li>'
-    +'<li>Sube el archivo <code>catalog.json</code> descargado</li>'
+    +'<li>Sube <strong>todos</strong> los archivos catalog_N.json descargados</li>'
     +'<li>Haz commit: <em>"Update catalog"</em></li>'
     +'<li>Espera ~1 min y recarga StreamVibe</li>'
     +'</ol>'
     +'<div style="margin-top:12px;padding:10px;background:rgba(16,185,129,0.1);border-radius:8px;color:#10B981;">'
-    +'✅ StreamVibe cargará <strong>'+count.toLocaleString()+' elementos</strong> desde:<br>'
-    +'<code style="font-size:11px;">https://edier27.github.io/StreamVibe/catalog.json</code>'
+    +'✅ StreamVibe cargará <strong>'+count.toLocaleString()+' elementos</strong> desde '+parts+' archivo(s):<br>'
+    +(parts===1
+      ? '<code style="font-size:11px;">catalog.json</code>'
+      : Array.from({length:parts},function(_,i){ return '<code style="font-size:11px;">catalog_'+(i+1)+'.json</code>'; }).join(' ')
+    )
     +'</div>';
   var hist = document.getElementById('sync-history');
   if(hist) hist.parentNode.insertBefore(div, hist);
