@@ -2054,6 +2054,17 @@ function initLanding() {
   }, 3000);
 }
 
+
+// ── GLOBAL CLICK DELEGATION para tarjetas (evita onclick inline con comillas) ──
+document.addEventListener('click', function(e){
+  var card = e.target.closest('[data-pid]');
+  if(card){
+    var pid = card.getAttribute('data-pid');
+    if(typeof oleadaPlay === 'function') oleadaPlay(pid);
+    else if(typeof openPlayer === 'function') openPlayer(pid);
+  }
+});
+
 function initCatalog(genre) {
   currentGenre = genre || '';
   if(window.allContent && window.allContent.length > 0) allContent = window.allContent;
@@ -2579,6 +2590,8 @@ function setOleadaCategory(cat){
 }
 
 function renderOleada(){
+  // Solo ejecutar si estamos en la página del catálogo
+  if(!document.getElementById('oleada-app')) return;
   var items = (window.allContent||allContent||[]);
   var fn = OLEADA_CATS[_oleadaCategory] || OLEADA_CATS.todos;
   var filtered = items.filter(fn);
@@ -2633,6 +2646,7 @@ function setOleadaGroup(g){
 
 function renderOleadaList(items){
   var list = document.getElementById('ola-channel-list');
+  if(!list) return;
   if(!list) return;
   if(!items.length){
     list.innerHTML = '<div style="padding:40px 16px;text-align:center;color:var(--text3);font-size:13px;">Sin resultados</div>';
@@ -2786,6 +2800,11 @@ function renderRowsView(){
   });
   if(!html) html = '<div style="padding:40px;text-align:center;color:var(--text2);">🔍 Sin resultados</div>';
   rows.innerHTML = html;
+  // Event delegation para botones "Ver todos"
+  if(rows) rows.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-genre]');
+    if(btn) filterGenre(btn.getAttribute('data-genre'));
+  });
 }
 
 function makeRow(title, items, kind){
@@ -2796,18 +2815,27 @@ function makeRow(title, items, kind){
   return '<div class="cat-row">'
     +'<div class="cat-row-header">'
       +'<div class="cat-row-title">'+title+' <span style="font-size:12px;color:var(--text3);font-weight:400;">('+total+')</span></div>'
-      +(total>20?'<button class="cat-row-see-all" onclick="filterGenre(''+title+'')">Ver todos →</button>':'')
+      +(total>20?'<button class="cat-row-see-all" data-genre="__GENRE__" style="font-size:12px;color:var(--accent2);cursor:pointer;border:none;background:none;font-weight:600;">Ver todos →</button>'.replace('__GENRE__', (title||'').replace(/"/g,'')):'')
     +'</div>'
     +'<div class="cat-scroll">'+cards+'</div>'
   +'</div>';
 }
 
 // Card TV en Vivo (cuadrada con logo)
+function _initLCardDelegation(container){
+  if(!container || container._lcardInit) return;
+  container._lcardInit = true;
+  container.addEventListener('click', function(e){
+    var card = e.target.closest('[data-pid]');
+    if(card) oleadaPlay(card.getAttribute('data-pid'));
+  });
+}
+
 function makeLCard(item){
   var thumb = item.logo
     ? '<img src="'+item.logo+'" style="width:65%;height:65%;object-fit:contain;position:relative;z-index:1;" onerror="_imgErr(this)"><span data-fb="1" style="display:none;font-size:36px;">'+item.emoji+'</span>'
     : '<span class="lcard-emoji" style="font-size:38px;position:relative;z-index:1;">'+item.emoji+'</span>';
-  return '<div class="lcard" onclick="openPlayer(''+item.id+'')">'
+  return '<div class="lcard" data-pid="'+item.id+'" style="cursor:pointer;">'
     +'<div class="lcard-thumb" style="background:linear-gradient(135deg,'+item.bg1+','+item.bg2+');">'
       +'<span class="lcard-live">● EN VIVO</span>'
       +thumb
@@ -2822,7 +2850,7 @@ function makeMCard(item){
   var thumb = item.logo
     ? '<img src="'+item.logo+'" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.remove()">'
     : '<span style="font-size:44px;position:relative;z-index:1;">'+item.emoji+'</span>';
-  return '<div class="mcard" onclick="openPlayer(''+item.id+'')">'
+  return '<div class="mcard" data-pid="'+item.id+'" style="cursor:pointer;">'
     +'<div class="mcard-thumb" style="background:linear-gradient(135deg,'+item.bg1+','+item.bg2+');">'
       +thumb
       +'<div class="mcard-overlay"><div class="mcard-play">▶</div></div>'
@@ -2851,7 +2879,7 @@ function renderFlatView(){
     grid.style.display = '';
     var start=(currentPage-1)*PAGE_SIZE;
     grid.innerHTML = filtered.slice(start,start+PAGE_SIZE).map(function(item){
-      return '<div style="display:flex;gap:14px;align-items:center;padding:12px 14px;background:var(--s1);border-radius:10px;cursor:pointer;margin-bottom:8px;transition:.2s;" onclick="openPlayer(''+item.id+'')" onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background='var(--s1)'">'
+      return '<div style="display:flex;gap:14px;align-items:center;padding:12px 14px;background:var(--s1);border-radius:10px;cursor:pointer;margin-bottom:8px;transition:.2s;" data-pid="'+item.id+'">'
         +'<div style="width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,'+item.bg1+','+item.bg2+');display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">'
                 +(item.logo?'<img src="'+item.logo+'" style="width:80%;height:80%;object-fit:contain;" onerror="_imgErrHide(this)">':'<span style="font-size:26px;">'+item.emoji+'</span>')
         +'</div>'
@@ -2880,7 +2908,7 @@ function setCatalogView(v){
 function makeCard(item){
   var inList = (myList||[]).includes(item.id);
   if(currentView==='list'){
-    return '<div class="ccard" onclick="openPlayer(\''+item.id+'\')">'  
+    return '<div class="ccard" data-pid="'+item.id+'" style="cursor:pointer;">'  
       +'<div class="ccard-thumb"><div class="thumb-bg" style="background:linear-gradient(135deg,'+item.bg1+','+item.bg2+')"></div>'
         +'<div style="position:relative;z-index:1;font-size:32px;">'+item.emoji+'</div>'
         +'<div class="ccard-overlay"><div class="play-btn">▶</div></div>'
@@ -2892,7 +2920,7 @@ function makeCard(item){
         +'<div class="ccard-desc">'+item.desc+'</div>'
       +'</div>'
       +'<div style="padding:14px;display:flex;flex-direction:column;gap:8px;justify-content:center;flex-shrink:0;">'
-        +'<button onclick="event.stopPropagation();openPlayer('+item.id+')" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">▶ Ver ahora</button>'
+        +'<button data-pid="'+item.id+'" data-stop="1" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">▶ Ver ahora</button>'
         +'<button onclick="event.stopPropagation();toggleList('+item.id+')" style="background:var(--s2);color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:7px 16px;font-size:12px;cursor:pointer;white-space:nowrap;">'+(inList?'✓ En mi lista':'+ Mi lista')+'</button>'
       +'</div>'
     +'</div>';
@@ -2900,7 +2928,7 @@ function makeCard(item){
   var thumbContent = item.logo
     ? '<img src="'+item.logo+'" style="position:relative;z-index:1;width:64px;height:64px;border-radius:10px;object-fit:cover;" onerror="_imgErr(this)"><span data-fb="1" style="display:none;font-size:40px;">'+item.emoji+'</span>'
     : '<div style="position:relative;z-index:1;font-size:44px;">'+item.emoji+'</div>';
-  return '<div class="ccard" onclick="openPlayer(\''+item.id+'\')">'
+  return '<div class="ccard" data-pid="'+item.id+'" style="cursor:pointer;">'
     +'<div class="ccard-thumb">'
       +'<div class="thumb-bg" style="background:linear-gradient(135deg,'+item.bg1+','+item.bg2+')"></div>'
       +thumbContent
