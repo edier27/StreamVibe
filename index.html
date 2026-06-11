@@ -61,6 +61,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:fl
 .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(123,47,255,0.15);border:1px solid rgba(123,47,255,0.3);border-radius:20px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--accent2);margin-bottom:20px;font-family:var(--font-mono);}
 .hero-badge::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse-dot 2s infinite;}
 @keyframes pulse-dot{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(.8);}}
+@keyframes spin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 .hero-title{font-family:var(--font-display);font-size:clamp(40px,5vw,64px);font-weight:800;line-height:1.05;letter-spacing:-2px;margin-bottom:20px;}
 .hero-title span{background:linear-gradient(135deg,var(--accent),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
 .hero-sub{font-size:17px;color:var(--text2);line-height:1.7;margin-bottom:32px;font-weight:400;max-width:500px;}
@@ -249,6 +250,115 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 32px;display:fl
 /* SIDEBAR */
 .layout{display:flex;padding-top:62px;min-height:100vh;}
 .sidebar{width:220px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);padding:20px 0;position:fixed;top:62px;bottom:0;overflow-y:auto;}
+/* ── OLEADA STYLE ── */
+#oleada-app{display:flex;height:calc(100vh - 62px);margin-top:62px;background:#0A0A0F;overflow:hidden;position:relative;z-index:1;width:100%;}
+
+/* Sidebar */
+#oleada-sidebar{width:160px;flex-shrink:0;background:#111118;border-right:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;padding:16px 0;overflow-y:auto;}
+.ola-logo{font-family:var(--font-display);font-size:15px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;padding:0 16px 14px;cursor:pointer;}
+.ola-search-wrap{position:relative;padding:0 10px 14px;}
+.ola-search{width:100%;background:#1C1C26;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:7px 12px 7px 30px;color:#fff;font-size:11px;font-family:var(--font-body);outline:none;}
+.ola-search:focus{border-color:var(--accent);}
+.ola-search-ic{position:absolute;left:18px;top:50%;transform:translateY(-60%);font-size:11px;color:var(--text3);}
+.ola-nav{display:flex;flex-direction:column;gap:2px;padding:0 8px;flex:1;}
+.ola-nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:10px;border:none;background:none;color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);text-align:left;width:100%;transition:.15s;}
+.ola-nav-item:hover{background:rgba(255,255,255,0.06);color:#fff;}
+.ola-nav-item.active{background:rgba(123,47,255,0.18);color:#fff;font-weight:600;}
+.ola-nav-item.active .ola-nav-ic{filter:none;}
+.ola-nav-ic{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.ola-nav-bottom{padding:8px;border-top:1px solid rgba(255,255,255,0.06);margin-top:auto;}
+
+/* Centro */
+#oleada-center{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;background:#000;}
+#ola-video-wrap{position:relative;background:#000;width:100%;flex:1;min-height:0;overflow:hidden;}
+#ola-video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;}
+#ola-poster{position:absolute;inset:0;background:linear-gradient(135deg,#0a0a1a,#1a0545);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:3;}
+#ola-poster-logo-wrap{width:80px;height:80px;border-radius:16px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+#ola-poster-logo{width:80%;height:80%;object-fit:contain;}
+#ola-poster-emoji{font-size:40px;}
+#ola-poster-title{font-family:var(--font-display);font-size:18px;font-weight:700;color:#fff;}
+#ola-poster-status{font-size:12px;color:rgba(255,255,255,0.4);}
+#ola-video-bar{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;background:linear-gradient(to top,rgba(0,0,0,0.7),transparent);display:flex;align-items:center;justify-content:space-between;z-index:4;}
+#ola-now-playing{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;}
+#ola-live-dot{background:#EF4444;color:#fff;font-size:9px;font-weight:700;padding:3px 7px;border-radius:4px;font-family:var(--font-mono);}
+#ola-fs-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:14px;}
+#ola-video-info{padding:8px 16px 4px;flex-shrink:0;}
+#ola-groups-row{display:flex;gap:8px;padding:6px 16px;overflow-x:auto;flex-shrink:0;max-height:44px;}
+#ola-groups-row::-webkit-scrollbar{display:none;}
+.ola-group-chip{padding:5px 14px;border-radius:16px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:.15s;}
+.ola-group-chip:hover,.ola-group-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* Lista derecha */
+#oleada-list{width:280px;flex-shrink:0;background:#111118;border-left:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;overflow:hidden;}
+.ola-list-header{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.ola-list-header span:first-child{font-family:var(--font-display);font-size:14px;font-weight:700;}
+#ola-channel-list{flex:1;overflow-y:auto;padding:6px 0;}
+.ola-ch{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;transition:.15s;border-left:3px solid transparent;}
+.ola-ch:hover{background:rgba(255,255,255,0.05);}
+.ola-ch.active{background:rgba(123,47,255,0.12);border-left-color:var(--accent);}
+.ola-ch-num{font-size:11px;color:var(--text3);font-family:var(--font-mono);width:20px;flex-shrink:0;text-align:right;}
+.ola-ch-logo{width:36px;height:36px;border-radius:8px;background:var(--s2);object-fit:contain;flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.ola-ch-logo img{width:100%;height:100%;object-fit:contain;}
+.ola-ch-logo span{font-size:18px;}
+.ola-ch-info{flex:1;min-width:0;}
+.ola-ch-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ola-ch-group{font-size:10px;color:var(--text3);margin-top:1px;}
+.ola-ch-playing{width:6px;height:6px;border-radius:50%;background:#EF4444;flex-shrink:0;animation:pulse-dot 1s infinite;}
+/* ── FIN OLEADA ── */
+/* ── MAGIS STYLE CATALOG ── */
+.cat-hero{background:linear-gradient(135deg,#0d0221 0%,#1a0545 60%,#0d0221 100%);padding:28px 32px 20px;border-bottom:1px solid var(--border);}
+.cat-hero-title{font-family:var(--font-display);font-size:26px;font-weight:800;margin-bottom:4px;}
+.cat-hero-title span{background:linear-gradient(135deg,var(--accent),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.cat-search-bar{display:flex;gap:10px;align-items:center;background:var(--s2);border:1.5px solid var(--border);border-radius:12px;padding:10px 16px;max-width:480px;margin-top:16px;transition:.2s;}
+.cat-search-bar:focus-within{border-color:var(--accent);}
+.cat-search-bar input{background:none;border:none;outline:none;color:var(--text);font-size:14px;font-family:var(--font-body);flex:1;}
+.cat-search-bar input::placeholder{color:var(--text3);}
+/* Filas horizontales */
+.cat-row{margin-bottom:36px;}
+.cat-row-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding:0 2px;}
+.cat-row-title{font-family:var(--font-display);font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px;}
+.cat-row-see-all{font-size:12px;color:var(--accent2);cursor:pointer;font-weight:600;border:none;background:none;font-family:var(--font-body);}
+.cat-row-see-all:hover{color:var(--accent);}
+.cat-scroll{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px;scroll-behavior:smooth;}
+.cat-scroll::-webkit-scrollbar{height:3px;}
+.cat-scroll::-webkit-scrollbar-thumb{background:var(--accent);border-radius:3px;}
+/* Card Logo (TV en Vivo) */
+.lcard{flex:0 0 130px;border-radius:12px;overflow:hidden;background:var(--s1);cursor:pointer;position:relative;transition:.25s;border:1.5px solid transparent;}
+.lcard:hover{border-color:var(--accent);transform:scale(1.05);}
+.lcard-thumb{width:100%;aspect-ratio:1;background:var(--s2);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;}
+.lcard-thumb img{width:70%;height:70%;object-fit:contain;}
+.lcard-thumb .lcard-emoji{font-size:38px;}
+.lcard-live{position:absolute;top:6px;left:6px;background:#EF4444;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;font-family:var(--font-mono);}
+.lcard-name{padding:8px 10px;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-display);}
+.lcard-group{padding:0 10px 8px;font-size:10px;color:var(--text3);}
+/* Card Película/Serie */
+.mcard{flex:0 0 150px;border-radius:12px;overflow:hidden;background:var(--s1);cursor:pointer;position:relative;transition:.25s;}
+.mcard:hover{transform:translateY(-5px) scale(1.03);}
+.mcard:hover .mcard-overlay{opacity:1;}
+.mcard-thumb{width:100%;aspect-ratio:2/3;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;overflow:hidden;}
+.mcard-thumb img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+.mcard-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.55);opacity:0;transition:.25s;display:flex;align-items:center;justify-content:center;}
+.mcard-play{width:44px;height:44px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;}
+.mcard-badge{position:absolute;top:7px;left:7px;font-size:9px;font-weight:700;padding:2px 6px;border-radius:5px;font-family:var(--font-mono);z-index:2;}
+.mcard-info{padding:9px 10px 11px;}
+.mcard-title{font-size:12px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-display);}
+.mcard-meta{font-size:10px;color:var(--text3);}
+/* Vista GRID grande */
+.grid-view-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px;}
+.grid-view-wrap.tv-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));}
+/* Tabs de vista */
+.view-tabs{display:flex;gap:6px;background:var(--s2);border-radius:10px;padding:4px;}
+.view-tab{padding:6px 14px;border-radius:7px;border:none;background:none;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font-body);transition:.15s;}
+.view-tab.active{background:var(--accent);color:#fff;}
+/* Cat pills rediseñadas */
+.cat-pills{display:flex;gap:8px;overflow-x:auto;padding:0 0 4px;margin-top:14px;}
+.cat-pills::-webkit-scrollbar{display:none;}
+.cat-pill{padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);color:var(--text2);background:transparent;font-family:var(--font-body);transition:.2s;white-space:nowrap;flex-shrink:0;}
+.cat-pill:hover{border-color:var(--accent2);color:var(--accent2);}
+.cat-pill.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+/* Grupo label en scroll */
+.group-chip{flex:0 0 auto;padding:5px 12px;border-radius:16px;background:var(--s2);border:1px solid var(--border);font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap;transition:.15s;}
+.group-chip:hover,.group-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 .sb-section{padding:0 12px;margin-bottom:24px;}
 .sb-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;padding:0 8px;margin-bottom:8px;font-family:var(--font-mono);}
 .sb-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;transition:.15s;width:100%;background:none;border:none;font-family:var(--font-body);text-align:left;}
@@ -858,6 +968,7 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
 /* ═══ SPA NAVIGATION ═══ */
 .page{display:none;}
 .page.active{display:block;}
+#page-catalog.active{display:block;height:100vh;overflow:hidden;}
 #page-landing .hero{min-height:100vh;}
 .spa-nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:14px 32px;display:flex;align-items:center;gap:20px;background:rgba(10,10,15,0.95);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.08);}
 .spa-logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;background:linear-gradient(135deg,#7B2FFF,#FF6B35);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;flex-shrink:0;}
@@ -940,8 +1051,8 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
       </h1>
       <p class="hero-sub">Miles de películas, series y canales en vivo. Gratis con publicidad o sin interrupciones con Premium. Empieza hoy.</p>
       <div class="hero-actions">
-        <button class="btn-hero" onclick="openModal('register')">▶ Empezar gratis</button>
-        <button class="btn-hero-ghost" onclick="openModal('login')">Ver planes</button>
+        <button class="btn-hero" onclick="navigate('auth','register')">▶ Empezar gratis</button>
+        <button class="btn-hero-ghost" onclick="navigate('payments')">Ver planes</button>
       </div>
       <div class="hero-stats">
         <div class="stat-item">
@@ -966,31 +1077,31 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
     <!-- Hero Visual Cards -->
     <div class="hero-visual">
       <div class="hero-cards">
-        <div class="hcard hcard-1">
-          <div class="poster-art" style="background:linear-gradient(135deg,#0d0221,#1a0545);">🎬</div>
-          <div class="hcard-overlay"></div>
-          <div class="hcard-badge" style="background:var(--accent);">PRO</div>
-          <div class="hcard-info">
-            <div class="hcard-title">Noche de Acero</div>
-            <div class="hcard-meta">Acción • 2024 ⭐ 8.4</div>
-          </div>
-        </div>
-        <div class="hcard hcard-2">
-          <div class="poster-art" style="background:linear-gradient(135deg,#210505,#4a0e0e);">🎭</div>
-          <div class="hcard-overlay"></div>
-          <div class="hcard-badge" style="background:var(--orange);">NUEVO</div>
-          <div class="hcard-info">
-            <div class="hcard-title">El Último Código</div>
-            <div class="hcard-meta">Drama • 2024 ⭐ 9.1</div>
-          </div>
-        </div>
-        <div class="hcard hcard-3">
-          <div class="poster-art" style="background:linear-gradient(135deg,#031505,#0a3a0e);">🌿</div>
+        <div class="hcard hcard-1" id="hero-card-1">
+          <div class="poster-art" style="background:linear-gradient(135deg,#0d0221,#1a0545);">📺</div>
           <div class="hcard-overlay"></div>
           <div class="hcard-badge" style="background:#059669;">GRATIS</div>
           <div class="hcard-info">
-            <div class="hcard-title">Selva Profunda</div>
-            <div class="hcard-meta">Doc • 2023 ⭐ 7.8</div>
+            <div class="hcard-title" id="hc1-title">Cargando...</div>
+            <div class="hcard-meta" id="hc1-meta">StreamVibe</div>
+          </div>
+        </div>
+        <div class="hcard hcard-2" id="hero-card-2">
+          <div class="poster-art" style="background:linear-gradient(135deg,#210505,#4a0e0e);">🎬</div>
+          <div class="hcard-overlay"></div>
+          <div class="hcard-badge" style="background:var(--orange);">NUEVO</div>
+          <div class="hcard-info">
+            <div class="hcard-title" id="hc2-title">Cargando...</div>
+            <div class="hcard-meta" id="hc2-meta">StreamVibe</div>
+          </div>
+        </div>
+        <div class="hcard hcard-3" id="hero-card-3">
+          <div class="poster-art" style="background:linear-gradient(135deg,#031505,#0a3a0e);">🔴</div>
+          <div class="hcard-overlay"></div>
+          <div class="hcard-badge" style="background:var(--accent);">EN VIVO</div>
+          <div class="hcard-info">
+            <div class="hcard-title" id="hc3-title">Cargando...</div>
+            <div class="hcard-meta" id="hc3-meta">TV en Vivo</div>
           </div>
         </div>
       </div>
@@ -1068,7 +1179,7 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
           <li>Con publicidad</li>
           <li>1 pantalla a la vez</li>
         </ul>
-        <button class="plan-btn plan-btn-free" onclick="openModal('register')">Empezar gratis</button>
+        <button class="plan-btn plan-btn-free" onclick="navigate('auth','register')">Empezar gratis</button>
       </div>
       <!-- Pro -->
       <div class="plan featured-plan">
@@ -1083,7 +1194,7 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
           <li>2 pantallas simultáneas</li>
           <li>Descargas offline</li>
         </ul>
-        <button class="plan-btn plan-btn-pro" onclick="openModal('register')">Suscribirse por $8.99</button>
+        <button class="plan-btn plan-btn-pro" onclick="navigate('auth','register')">Suscribirse por $8.99</button>
       </div>
       <!-- Premium -->
       <div class="plan">
@@ -1097,7 +1208,7 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
           <li>Contenido exclusivo</li>
           <li>Acceso anticipado</li>
         </ul>
-        <button class="plan-btn plan-btn-prem" onclick="openModal('register')">Suscribirse por $14.99</button>
+        <button class="plan-btn plan-btn-prem" onclick="navigate('auth','register')">Suscribirse por $14.99</button>
       </div>
     </div>
   </div>
@@ -1189,151 +1300,108 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
 </div>
 
 <!-- ═══ PAGE: CATALOG ═══ -->
-<div class="page" id="page-catalog">
-  <div class="page-pt">
-    <div style="display:flex;min-height:calc(100vh - 62px);">
-<!-- NAV -->
+<div class="page" id="page-catalog" style="flex-direction:column;">
+<div id="oleada-app">
 
-
-<!-- LAYOUT -->
-<div class="layout">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sb-section">
-      <div class="sb-label">Principal</div>
-      <button class="sb-item" onclick="navTo('inicio')"><div class="sb-ic">🏠</div> Inicio</button>
-      <button class="sb-item active" onclick="navTo('catalogo')"><div class="sb-ic">🎬</div> Catálogo <div class="sb-badge">NEW</div></button>
-      <button class="sb-item" onclick="navTo('lista')"><div class="sb-ic">📋</div> Mi Lista</button>
-      <button class="sb-item" onclick="navTo('historial')"><div class="sb-ic">🕐</div> Historial</button>
+  <!-- SIDEBAR IZQUIERDO -->
+  <aside id="oleada-sidebar">
+    <div class="ola-logo" onclick="navigate('landing')">StreamVibe</div>
+    <div class="ola-search-wrap">
+      <span class="ola-search-ic">🔍</span>
+      <input id="search-input" class="ola-search" type="text" placeholder="Busca..." oninput="handleSearch()">
     </div>
-    <div class="sb-divider"></div>
-    <div class="sb-section">
-      <div class="sb-label">Categorías</div>
-      <button class="sb-item" onclick="filterGenre('Acción')"><div class="sb-ic">💥</div> Acción</button>
-      <button class="sb-item" onclick="filterGenre('Drama')"><div class="sb-ic">🎭</div> Drama</button>
-      <button class="sb-item" onclick="filterGenre('Sci-Fi')"><div class="sb-ic">🚀</div> Ciencia Ficción</button>
-      <button class="sb-item" onclick="filterGenre('Terror')"><div class="sb-ic">👻</div> Terror</button>
-      <button class="sb-item" onclick="filterGenre('Comedia')"><div class="sb-ic">😂</div> Comedia</button>
-      <button class="sb-item" onclick="filterGenre('Documental')"><div class="sb-ic">🎥</div> Documentales</button>
-      <button class="sb-item" onclick="filterGenre('Animación')"><div class="sb-ic">✨</div> Animación</button>
-    </div>
-    <div class="sb-divider"></div>
-    <div class="sb-section">
-      <div class="sb-label">Cuenta</div>
-      <button class="sb-item" onclick="showToast('⚙️ Configuración')"><div class="sb-ic">⚙️</div> Configuración</button>
-      <button class="sb-item" onclick="showToast('🚪 Cerrando sesión...')"><div class="sb-ic">🚪</div> Salir</button>
+    <nav class="ola-nav">
+      <button class="ola-nav-item active" id="ocat-vivo" onclick="setOleadaCategory('vivo')">
+        <span class="ola-nav-ic">📡</span><span>Vivo</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-populares" onclick="setOleadaCategory('populares')">
+        <span class="ola-nav-ic">🔥</span><span>Populares</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-series" onclick="setOleadaCategory('series')">
+        <span class="ola-nav-ic">🎬</span><span>Series</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-pelicula" onclick="setOleadaCategory('pelicula')">
+        <span class="ola-nav-ic">🎥</span><span>Pelicula</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-ninos" onclick="setOleadaCategory('ninos')">
+        <span class="ola-nav-ic" style="color:#FF6B35;">🧒</span><span>Niños</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-anime" onclick="setOleadaCategory('anime')">
+        <span class="ola-nav-ic">✨</span><span>Anime</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-deporte" onclick="setOleadaCategory('deporte')">
+        <span class="ola-nav-ic">⚽</span><span>Deporte</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-noticias" onclick="setOleadaCategory('noticias')">
+        <span class="ola-nav-ic">📰</span><span>Noticias</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-musica" onclick="setOleadaCategory('musica')">
+        <span class="ola-nav-ic">🎵</span><span>Música</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-todos" onclick="setOleadaCategory('todos')">
+        <span class="ola-nav-ic">▤</span><span>Todos</span>
+      </button>
+    </nav>
+    <div class="ola-nav-bottom">
+      <button class="ola-nav-item" onclick="navigate('auth','login')">
+        <span class="ola-nav-ic">👤</span><span>Perfil</span>
+      </button>
     </div>
   </aside>
 
-  <!-- MAIN -->
-  <main class="main">
-
-    <!-- PAGE HEADER -->
-    <div class="page-header">
-      <div>
-        <div class="page-title">Catálogo <span id="active-genre-label"></span></div>
-        <div class="result-count" id="result-count">Cargando...</div>
+  <!-- CENTRO: VIDEO + INFO -->
+  <div id="oleada-center">
+    <!-- Video principal inline -->
+    <div id="ola-video-wrap">
+      <video id="ola-video" playsinline controls></video>
+      <!-- Poster/loading -->
+      <div id="ola-poster">
+        <div id="ola-poster-logo-wrap">
+          <img id="ola-poster-logo" src="" onerror="this.style.display='none'">
+          <span id="ola-poster-emoji">📺</span>
+        </div>
+        <div id="ola-poster-title">Selecciona un canal</div>
+        <div id="ola-poster-status">← Elige un canal de la lista</div>
+      </div>
+      <!-- Overlay top: nombre canal -->
+      <div id="ola-video-bar">
+        <div id="ola-now-playing">
+          <span id="ola-live-dot">● EN VIVO</span>
+          <span id="ola-channel-name">—</span>
+        </div>
+        <button onclick="oleadaFullscreen()" id="ola-fs-btn">⛶</button>
       </div>
     </div>
-
-    <!-- FILTER BAR -->
-    <div class="filter-bar">
-      <select class="filter-select" onchange="applyFilters()" id="filter-year">
-        <option value="">📅 Año</option>
-        <option value="2024">2024</option>
-        <option value="2023">2023</option>
-        <option value="2022">2022</option>
-        <option value="2021">2021</option>
-      </select>
-      <select class="filter-select" onchange="applyFilters()" id="filter-rating">
-        <option value="">⭐ Rating</option>
-        <option value="9">9+ Excelente</option>
-        <option value="8">8+ Muy bueno</option>
-        <option value="7">7+ Bueno</option>
-      </select>
-      <select class="filter-select" onchange="applyFilters()" id="filter-type">
-        <option value="">🎬 Tipo</option>
-        <option value="Película">Película</option>
-        <option value="Serie">Serie</option>
-        <option value="Documental">Documental</option>
-      </select>
-      <select class="filter-select" onchange="applyFilters()" id="filter-access">
-        <option value="">🔓 Acceso</option>
-        <option value="GRATIS">Solo Gratis</option>
-        <option value="PRO">Solo Pro</option>
-      </select>
-      <div class="filter-divider"></div>
-      <button class="sort-btn" onclick="toggleSort()">
-        <span id="sort-icon">↕</span> <span id="sort-label">Relevancia</span>
-      </button>
-      <div class="filter-divider"></div>
-      <div class="view-toggle">
-        <button class="view-btn active" id="grid-btn" onclick="setView('grid')" title="Cuadrícula">⊞</button>
-        <button class="view-btn" id="list-btn" onclick="setView('list')" title="Lista">☰</button>
-      </div>
+    <!-- Info debajo del video: grupo/categoría activa -->
+    <div id="ola-video-info">
+      <div id="ola-info-name" style="font-family:var(--font-display);font-size:18px;font-weight:700;"></div>
+      <div id="ola-info-meta" style="font-size:12px;color:var(--text2);margin-top:4px;"></div>
     </div>
+    <!-- Fila de grupos/sub-categorías -->
+    <div id="ola-groups-row"></div>
+  </div>
 
-    <!-- GENRE PILLS -->
-    <div class="genre-pills" id="genre-pills">
-      <button class="genre-pill active" onclick="filterGenre('')">🎬 Todo</button>
-      <button class="genre-pill" onclick="filterGenre('Acción')">💥 Acción</button>
-      <button class="genre-pill" onclick="filterGenre('Drama')">🎭 Drama</button>
-      <button class="genre-pill" onclick="filterGenre('Sci-Fi')">🚀 Sci-Fi</button>
-      <button class="genre-pill" onclick="filterGenre('Terror')">👻 Terror</button>
-      <button class="genre-pill" onclick="filterGenre('Comedia')">😂 Comedia</button>
-      <button class="genre-pill" onclick="filterGenre('Documental')">🎥 Documental</button>
-      <button class="genre-pill" onclick="filterGenre('Animación')">✨ Animación</button>
-      <button class="genre-pill" onclick="filterGenre('Romance')">❤️ Romance</button>
-      <button class="genre-pill" onclick="filterGenre('Thriller')">🔪 Thriller</button>
+  <!-- DERECHA: lista de canales -->
+  <aside id="oleada-list">
+    <div class="ola-list-header">
+      <span id="ola-list-title">📡 Livestream</span>
+      <span id="ola-list-count" style="font-size:11px;color:var(--text3);"></span>
     </div>
+    <div id="ola-channel-list"></div>
+    <!-- IDs ocultos que necesita el JS del catálogo -->
+    <span id="result-count" style="display:none;"></span>
+    <span id="active-genre-label" style="display:none;"></span>
+    <div id="view-rows" style="display:none;"></div>
+    <div id="content-grid" style="display:none;"></div>
+    <div id="pagination" style="display:none;"></div>
+    <div id="genre-pills" style="display:none;"></div>
+    <select id="filter-year" style="display:none;"></select>
+    <select id="filter-type" style="display:none;"></select>
+    <select id="filter-access" style="display:none;"></select>
+    <select id="filter-rating" style="display:none;"></select>
+  </aside>
 
-    <!-- GRID -->
-    <div class="content-grid" id="content-grid"></div>
-
-    <!-- PAGINATION -->
-    <div class="pagination" id="pagination"></div>
-
-  </main>
 </div>
-
-<!-- PLAYER MODAL -->
-<div class="player-overlay" id="player-modal">
-  <div class="player-header">
-    <div class="player-title" id="player-title">Reproduciendo...</div>
-    <button class="player-close" onclick="closePlayer()">✕</button>
-  </div>
-  <div class="player-wrap">
-    <div class="player-screen">
-      <div class="player-emoji" id="player-emoji">🎬</div>
-      <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:700;" id="player-movie-title">—</div>
-      <div style="font-size:13px;color:rgba(255,255,255,0.5);">Streaming en 1080p • Dolby Audio</div>
-    </div>
-  </div>
-  <div class="player-controls">
-    <div class="progress-bar" onclick="seekVideo(event)">
-      <div class="progress-fill" id="progress-fill"></div>
-    </div>
-    <div class="ctrl-row">
-      <button class="ctrl-btn" onclick="togglePlay()" id="play-btn">⏸</button>
-      <button class="ctrl-btn" onclick="skipVideo(-10)">⏪</button>
-      <button class="ctrl-btn" onclick="skipVideo(10)">⏩</button>
-      <button class="ctrl-btn">🔊</button>
-      <span class="ctrl-time" id="current-time">0:35</span>
-      <span style="color:var(--text3);font-family:var(--font-mono);font-size:13px;">/ 1:47:20</span>
-      <div class="ctrl-spacer"></div>
-      <div class="quality-badge" onclick="showToast('📺 Calidad: 1080p → 4K')">1080p</div>
-      <button class="ctrl-btn" onclick="showToast('📺 Pantalla completa')">⛶</button>
-    </div>
-  </div>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast">
-  <span id="toast-msg">Mensaje</span>
-</div>
-    </div>
-  </div>
 </div>
 
 <!-- ═══ PAGE: PLAYER ═══ -->
@@ -1924,6 +1992,10 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
 
 var _currentPage = 'landing';
 var _pageHistory = [];
+// Global content arrays — se llenan desde Firebase
+window.allContent = window.allContent || [];
+window.filtered   = window.filtered   || [];
+window._userPlan  = window._userPlan  || 'free';
 
 // Pages config
 var PAGE_CONFIG = {
@@ -1972,18 +2044,61 @@ function goBack() {
 // ── PAGE INITS ────────────────────────────────────
 
 function initLanding() {
+  // Mostrar la landing siempre — sin redirigir por auth
   if (typeof renderCarousels === 'function') renderCarousels();
+  // Refrescar cuando Firebase cargue el contenido real
+  setTimeout(function(){
+    if(window.allContent && window.allContent.length > 0 && typeof renderCarousels === 'function'){
+      renderCarousels();
+    }
+  }, 3000);
 }
+
+
+// ── GLOBAL CLICK DELEGATION para tarjetas y canales ──
+document.addEventListener('click', function(e){
+  // Tarjetas con data-pid
+  var card = e.target.closest('[data-pid]');
+  if(card){
+    var pid = card.getAttribute('data-pid');
+    if(typeof oleadaPlay === 'function' && document.getElementById('oleada-app')) oleadaPlay(pid);
+    else if(typeof openPlayer === 'function') openPlayer(pid);
+    return;
+  }
+  // Canales Oleada con data-id
+  var ch = e.target.closest('.ola-ch[data-id]');
+  if(ch){
+    if(typeof oleadaPlay === 'function') oleadaPlay(ch.getAttribute('data-id'));
+    return;
+  }
+});
 
 function initCatalog(genre) {
   currentGenre = genre || '';
-  if (typeof renderGrid === 'function' && typeof allContent !== 'undefined') {
-    filtered = allContent.slice();
-    if (currentGenre) filtered = filtered.filter(function(c){ return c.genre === currentGenre; });
-    renderGrid();
+  if(window.allContent && window.allContent.length > 0) allContent = window.allContent;
+  filtered = allContent.slice();
+  // Oleada: renderizar siempre al entrar al catálogo
+  if(typeof renderOleada === 'function'){
+    // Intentar renderizar ahora y cada 500ms hasta que haya datos
+    function _tryRender(attempts){
+      var data = window.allContent || allContent || [];
+      if(data.length){ renderOleada(); return; }
+      if(attempts > 0) setTimeout(function(){ _tryRender(attempts-1); }, 500);
+    }
+    _tryRender(10); // hasta 5 segundos de espera
   }
+  if (currentGenre === 'Canal') {
+    filtered = filtered.filter(function(c){ return c.type === 'Canal' || c.m3uType === 'live'; });
+  } else if (currentGenre) {
+    filtered = filtered.filter(function(c){ return c.genre === currentGenre; });
+  }
+  if (typeof renderGrid === 'function') renderGrid();
   var lbl = document.getElementById('active-genre-label');
-  if (lbl) lbl.textContent = currentGenre ? ' — ' + currentGenre : '';
+  if (lbl) lbl.textContent = currentGenre === 'Canal' ? ' — 🔴 TV en Vivo' : (currentGenre ? ' — ' + currentGenre : '');
+  // Si aún no hay contenido, esperar a que Firebase cargue
+  if(!allContent.length) {
+    window._pendingCatalogGenre = genre;
+  }
 }
 
 function initPlayer(movieId) {
@@ -2060,6 +2175,43 @@ window.openModal = function(type) {
 };
 
 // ── FIREBASE CONFIG ───────────────────────────────
+// ── PROXY CONFIG ─────────────────────────────────
+// Cambia esta URL por la de tu proxy en Railway/Render
+var PROXY_URL = window.STREAMVIBE_PROXY || 'https://streamvibe-proxy-production.up.railway.app';
+// Verificar si el proxy responde correctamente
+(function(){
+  if(!PROXY_URL) return;
+  fetch(PROXY_URL + '/proxy?url=https://example.com', {method:'GET', cache:'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(4000) : undefined})
+    .then(function(r){ 
+      return r.text().then(function(t){ 
+        if(t.includes('not in allowlist') || t.includes('Forbidden') || r.status===403){
+          console.warn('[StreamVibe] Proxy con allowlist restrictiva, usando fallbacks directos');
+          window.PROXY_URL = PROXY_URL = '';
+        } else {
+          console.log('[StreamVibe] Proxy OK:', PROXY_URL);
+        }
+      });
+    })
+    .catch(function(){ 
+      console.warn('[StreamVibe] Proxy no disponible, usando fallbacks');
+      window.PROXY_URL = PROXY_URL = '';
+    });
+})();
+
+function _proxyStream(url) {
+  if (!PROXY_URL || !url) return url;
+  // Usar /m3u8 para streams HLS (reescribe segmentos internos)
+  // Usar /proxy para archivos directos (mp4, mkv, ts)
+  var isHls = url.includes('.m3u8') || url.includes('m3u') || 
+              url.includes('/live/') || url.includes('type=m3u') ||
+              url.includes(':8443/') || url.includes(':8080/');
+  if (isHls) {
+    return PROXY_URL + '/m3u8?url=' + encodeURIComponent(url);
+  }
+  return PROXY_URL + '/proxy?url=' + encodeURIComponent(url);
+}
+// ─────────────────────────────────────────────────
+
 var FIREBASE_CONFIG = {
   apiKey:            "AIzaSyAzOoK99y6L95sFAKZFZ0wY42Ljw2YEOM8",
   authDomain:        "globalacce-37997.firebaseapp.com",
@@ -2104,11 +2256,11 @@ function initFirebase() {
           window._userPlan = 'free';
         }
 
-        // If on auth page show profile, if on landing stay on landing
+        // Solo mostrar perfil si el usuario está EN la página de auth
         if (_currentPage === 'auth' && typeof showProfile === 'function') {
           showProfile(user);
         }
-        // If on landing and just logged in, stay on landing (don't redirect)
+        // En landing y otras páginas: NO redirigir, solo actualizar el nav
 
       } else {
         // Logged out
@@ -2136,43 +2288,145 @@ function initFirebase() {
     window.db   = _db;
     console.log('[StreamVibe] Firebase listo');
 
-    // Cargar contenido desde Firebase (sv_content)
-    _db.collection('sv_content').where('active','==',true).onSnapshot(function(snap){
-      if(!snap.empty){
-        var fbContent = snap.docs.map(function(d){
-          var data = d.data();
-          return {
-            id:       parseInt(d.id)||Math.floor(Math.random()*9000+1000),
-            fbId:     d.id,
-            title:    data.title||'Sin título',
-            genre:    data.genre||'Acción',
-            type:     data.type||'Película',
-            year:     data.year||2024,
-            rating:   data.rating||8.0,
-            badge:    data.access||'GRATIS',
-            desc:     data.desc||'',
-            emoji:    data.emoji||'🎬',
-            bg1:      data.bg1||'#0d0221',
-            bg2:      data.bg2||'#1a0545',
-            duration: data.duration||'',
-            stream:   data.stream||''
-          };
-        });
-        // Merge with existing content or replace
-        if(fbContent.length > 0){
-          window.allContent = fbContent;
-          window.filtered   = fbContent.slice();
-          if(typeof renderGrid === 'function' && typeof renderCarousels === 'function'){
-            renderCarousels();
-            if(window._currentPage === 'catalog') renderGrid();
-          }
-          console.log('[StreamVibe] '+fbContent.length+' títulos cargados desde Firebase');
-        }
-      }
-    });
+    // Cargar contenido desde Firebase — paginado para manejar colecciones grandes
+    function _docToItem(d){
+      var data = d.data();
+      return {
+        id:       d.id,
+        fbId:     d.id,
+        title:    data.title||'Sin título',
+        genre:    data.genre||data.group||'General',
+        type:     data.type||'Película',
+        m3uType:  data.m3uType||'',
+        year:     data.year||2024,
+        rating:   data.rating||8.0,
+        badge:    data.access||'GRATIS',
+        desc:     data.desc||'',
+        emoji:    data.emoji||'🎬',
+        logo:     data.logo||'',
+        bg1:      data.bg1||'#0d0221',
+        bg2:      data.bg2||'#1a0545',
+        duration: data.duration||'',
+        stream:   data.stream||''
+      };
+    }
 
-    // Cargar canales IPTV
-    _db.collection('sv_iptv').where('active','==',true).onSnapshot(function(snap){
+    function _applyContent(fbContent){
+      if(!fbContent.length) return;
+      window.allContent = fbContent;
+      window.filtered   = fbContent.slice();
+      allContent        = fbContent;
+      filtered          = fbContent.slice();
+      console.log('[StreamVibe] ✅ '+fbContent.length+' títulos listos');
+  // Siempre renderizar Oleada cuando los datos llegan
+  if(typeof renderOleada === 'function'){
+    clearTimeout(window._oleadaTimer);
+    window._oleadaTimer = setTimeout(function(){
+      renderOleada();
+      // Re-intentar por si el DOM aún no está listo
+      setTimeout(function(){ if(!document.querySelector('.ola-ch')) renderOleada(); }, 500);
+    }, 100);
+  }
+      var pg = window._currentPage || 'landing';
+      if(pg === 'landing' && typeof renderCarousels === 'function') renderCarousels();
+      else if(pg === 'catalog'){
+        if(typeof window._pendingCatalogGenre !== 'undefined' && window._pendingCatalogGenre !== null){
+          currentGenre = window._pendingCatalogGenre || '';
+          window._pendingCatalogGenre = null;
+        }
+        if(typeof applyFilters === 'function') applyFilters();
+        else if(typeof renderGrid === 'function') renderGrid();
+      }
+    }
+
+    // Cargar catalog_N.json desde GitHub (múltiples partes para listas grandes)
+    var BASE_URL = 'https://edier27.github.io/StreamVibe/';
+    var _typeMap = {movie:'Película',series:'Serie',live:'Canal',other:'Documental'};
+    var _emojiMap = {movie:'🎬',series:'📺',live:'🔴',other:'🎥'};
+    var _bgPairs = [['#0d0221','#1a0545'],['#1a0000','#3a0000'],['#001a0d','#003a1a'],['#001a1a','#003a3a']];
+
+    function _expandItem(item, idx){
+      // Soporta tanto formato compacto {i,t,tp,g,l,s,a} como formato completo
+      var isCompact = item.t !== undefined;
+      var type   = isCompact ? item.tp : (item.m3uType||'movie');
+      var title  = isCompact ? item.t  : (item.title||'Sin título');
+      var group  = isCompact ? item.g  : (item.group||item.genre||'General');
+      var logo   = isCompact ? item.l  : (item.logo||'');
+      var stream = isCompact ? item.s  : (item.stream||item.url||'');
+      var access = isCompact ? item.a  : (item.access||'GRATIS');
+      var bg = _bgPairs[(idx||0) % _bgPairs.length];
+      return {
+        id:       String(isCompact ? item.i : (item.id||idx)),
+        title:    title,
+        genre:    group || _typeMap[type] || 'General',
+        group:    group,
+        type:     _typeMap[type] || 'Película',
+        m3uType:  type,
+        year:     2026,
+        rating:   8.0,
+        badge:    access,
+        access:   access,
+        desc:     title,
+        emoji:    _emojiMap[type]||'🎬',
+        logo:     logo,
+        bg1:      bg[0],
+        bg2:      bg[1],
+        duration: '',
+        stream:   stream
+      };
+    }
+
+    function _loadCatalogJSON(){
+      var allItems = [];
+      var BASE = BASE_URL;
+      var v = '?v='+Math.floor(Date.now()/300000); // cache 5 min
+
+      function tryPart(n){
+        var url = BASE+'catalog_'+n+'.json'+v;
+        console.log('[StreamVibe] Cargando '+url);
+        fetch(url)
+          .then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); })
+          .then(function(data){
+            var items = Array.isArray(data) ? data : [];
+            var offset = allItems.length;
+            items.forEach(function(item, i){ allItems.push(_expandItem(item, offset+i)); });
+            console.log('[StreamVibe] catalog_'+n+'.json: '+items.length+' items (total: '+allItems.length+')');
+            if(items.length === 40000){
+              tryPart(n+1); // hay más partes
+            } else {
+              _applyContent(allItems); // última parte
+            }
+          })
+          .catch(function(err){
+            if(n === 1){
+              // Intentar catalog.json sin número
+              fetch(BASE+'catalog.json'+v)
+                .then(function(r){ if(!r.ok) throw new Error('404'); return r.json(); })
+                .then(function(data){
+                  var items = Array.isArray(data) ? data : [];
+                  _applyContent(items.map(function(item,i){ return _expandItem(item,i); }));
+                })
+                .catch(function(){
+                  console.warn('[StreamVibe] Sin catalog.json, usando Firestore fallback');
+                  if(_db){
+                    _db.collection('sv_content').limit(500).get()
+                      .then(function(snap){
+                        _applyContent(snap.docs.filter(function(d){ return d.data().active!==false; }).map(_docToItem));
+                      }).catch(function(e){ console.error('[StreamVibe] Firestore error:', e.message); });
+                  }
+                });
+            } else {
+              // n > 1 y no hay más partes — aplicar lo que tenemos
+              if(allItems.length) _applyContent(allItems);
+            }
+          });
+      }
+      tryPart(1);
+    }
+    _loadCatalogJSON();
+
+    // Canales IPTV (colección separada)
+    _db.collection('sv_iptv').onSnapshot(function(snap){
       if(!snap.empty){
         var channels = snap.docs.map(function(d){
           var data = d.data();
@@ -2198,7 +2452,10 @@ function initFirebase() {
           var existing = (window.allContent||[]).filter(function(c){ return c.type !== 'Canal'; });
           window.allContent = existing.concat(channels);
           window.filtered   = window.allContent.slice();
-          if(typeof renderGrid === 'function' && window._currentPage === 'catalog') renderGrid();
+          allContent = window.allContent;
+          filtered = window.filtered.slice();
+          if(typeof applyFilters === 'function' && window._currentPage === 'catalog') applyFilters();
+          else if(typeof renderGrid === 'function' && window._currentPage === 'catalog') renderGrid();
           console.log('[StreamVibe] '+channels.length+' canales IPTV cargados');
         }
       }
@@ -2264,12 +2521,18 @@ function makeCard(item){
 
 // Populate carousels
 function renderCarousels(){
+  // Usar contenido de Firebase si está disponible, sino usar demo hardcoded
+  var data = [];
+  if(window.allContent && window.allContent.length > 0) data = window.allContent;
+  else if(typeof allContent !== 'undefined' && allContent && allContent.length > 0) data = allContent;
+  if(!data.length) return; // No hay datos aún, esperar Firebase
+
   var trending = document.getElementById('carousel-trending');
   var cont     = document.getElementById('carousel-continue');
   var free     = document.getElementById('carousel-free');
-  if(trending) trending.innerHTML = content.map(makeCard).join('');
-  if(cont)     cont.innerHTML     = content.slice(2).concat(content.slice(0,2)).map(makeCard).join('');
-  if(free)     free.innerHTML     = content.filter(function(c){return c.badge==='GRATIS';}).map(makeCard).join('');
+  if(trending) trending.innerHTML = data.slice(0,12).map(makeCard).join('');
+  if(cont)     cont.innerHTML     = data.slice(0,12).map(makeCard).join('');
+  if(free)     free.innerHTML     = data.filter(function(c){return c.badge==='GRATIS';}).slice(0,12).map(makeCard).join('');
 }
 renderCarousels();
 
@@ -2318,59 +2581,424 @@ function showToast(msg){
   setTimeout(function(){ t.classList.remove('show'); }, 3000);
 }
 
+
+// ── IMG HELPERS ──
+function _imgErr(el){ el.style.display='none'; var s=el.parentNode.querySelector('[data-fb]'); if(s)s.style.display='inline'; }
+function _imgErrHide(el){ el.remove(); }
+
 // ─── CATALOG ───────────────────────────
 // ── DATA ─────────────────────────────────────────
-var allContent = [
-  {id:1,title:'Noche de Acero',genre:'Acción',type:'Película',year:2024,rating:8.4,badge:'PRO',desc:'Un ex agente de élite debe infiltrarse en una red criminal para salvar a su familia.',emoji:'🎬',bg1:'#0d0221',bg2:'#1a0545',duration:'1h 47m'},
-  {id:2,title:'El Último Código',genre:'Drama',type:'Película',year:2024,rating:9.1,badge:'NUEVO',desc:'Un programador descubre un algoritmo que podría cambiar el destino de la humanidad.',emoji:'💻',bg1:'#210505',bg2:'#3a0e0e',duration:'2h 12m'},
-  {id:3,title:'Selva Profunda',genre:'Documental',type:'Documental',year:2023,rating:7.8,badge:'GRATIS',desc:'Un viaje al corazón del Amazonas para descubrir especies nunca antes documentadas.',emoji:'🌿',bg1:'#031505',bg2:'#0a3a0e',duration:'1h 28m'},
-  {id:4,title:'Código Rojo',genre:'Thriller',type:'Serie',year:2024,rating:8.7,badge:'PRO',desc:'Una detective infiltrada en el gobierno descubre la conspiración más grande del siglo.',emoji:'🔴',bg1:'#1a0505',bg2:'#3a0e0e',duration:'8 eps'},
-  {id:5,title:'La Gran Fuga',genre:'Acción',type:'Película',year:2023,rating:8.2,badge:'GRATIS',desc:'Cinco presos con habilidades únicas deben escapar de la prisión más segura del mundo.',emoji:'🏃',bg1:'#050a1a',bg2:'#0e1e3a',duration:'1h 55m'},
-  {id:6,title:'Universo Oculto',genre:'Sci-Fi',type:'Serie',year:2024,rating:9.3,badge:'NUEVO',desc:'Científicos descubren portales a dimensiones paralelas con consecuencias devastadoras.',emoji:'🚀',bg1:'#05051a',bg2:'#0e0e3a',duration:'10 eps'},
-  {id:7,title:'Entre Montañas',genre:'Drama',type:'Película',year:2023,rating:7.5,badge:'GRATIS',desc:'Una familia colombiana supera sus diferencias en un viaje a la Sierra Nevada.',emoji:'⛰️',bg1:'#0a0a05',bg2:'#1e1e0a',duration:'1h 42m'},
-  {id:8,title:'Tormenta Digital',genre:'Thriller',type:'Película',year:2024,rating:8.0,badge:'PRO',desc:'Un hacker es contratado por el gobierno para detener un ciberataque de escala mundial.',emoji:'⚡',bg1:'#05101a',bg2:'#0a253a',duration:'1h 58m'},
-  {id:9,title:'La Sombra del Rey',genre:'Drama',type:'Serie',year:2023,rating:8.9,badge:'PRO',desc:'Una épica historia de poder, traición y redención ambientada en la Colombia colonial.',emoji:'👑',bg1:'#1a1000',bg2:'#3a2500',duration:'12 eps'},
-  {id:10,title:'Monstruos Marinos',genre:'Documental',type:'Documental',year:2024,rating:8.1,badge:'GRATIS',desc:'Las criaturas más extrañas de las profundidades del océano Pacífico.',emoji:'🦑',bg1:'#000a1a',bg2:'#00153a',duration:'1h 15m'},
-  {id:11,title:'Risas al Límite',genre:'Comedia',type:'Película',year:2023,rating:7.3,badge:'GRATIS',desc:'Tres amigos colombianos en un viaje por carretera que sale completamente mal.',emoji:'😂',bg1:'#1a1a00',bg2:'#3a3a00',duration:'1h 38m'},
-  {id:12,title:'Dimensión 7',genre:'Sci-Fi',type:'Película',year:2024,rating:8.6,badge:'PRO',desc:'Una astronauta queda atrapada en un bucle temporal a bordo de una estación espacial.',emoji:'🌌',bg1:'#07031a',bg2:'#14063a',duration:'2h 05m'},
-  {id:13,title:'El Detective Perdido',genre:'Thriller',type:'Serie',year:2024,rating:8.4,badge:'NUEVO',desc:'Un detective con amnesia intenta resolver su propio crimen mientras recupera la memoria.',emoji:'🔍',bg1:'#0a0a0a',bg2:'#1a1a1a',duration:'6 eps'},
-  {id:14,title:'Amor en Caída',genre:'Romance',type:'Película',year:2023,rating:7.6,badge:'GRATIS',desc:'Dos extraños se conocen en un vuelo transatlántico y sus vidas cambian para siempre.',emoji:'❤️',bg1:'#1a0510',bg2:'#3a0a20',duration:'1h 52m'},
-  {id:15,title:'La Casa del Bosque',genre:'Terror',type:'Película',year:2024,rating:8.3,badge:'PRO',desc:'Una familia se muda a una casa con siglos de oscuros secretos enterrados en sus paredes.',emoji:'👻',bg1:'#050505',bg2:'#0f0f0f',duration:'1h 44m'},
-  {id:16,title:'Robots del Futuro',genre:'Animación',type:'Película',year:2023,rating:8.7,badge:'GRATIS',desc:'Un niño y su robot aprenden sobre la amistad en un mundo donde las máquinas sienten.',emoji:'🤖',bg1:'#001a1a',bg2:'#003a3a',duration:'1h 28m'},
-  {id:17,title:'Guerreros del Viento',genre:'Acción',type:'Película',year:2024,rating:7.9,badge:'NUEVO',desc:'Cuatro guerreros legendarios deben unirse para salvar su reino de una invasión.',emoji:'⚔️',bg1:'#0a0500',bg2:'#1e0e00',duration:'2h 18m'},
-  {id:18,title:'La Última Sinfonía',genre:'Drama',type:'Película',year:2023,rating:9.0,badge:'PRO',desc:'Un compositor sordo intenta crear su obra maestra antes de perder completamente el oído.',emoji:'🎵',bg1:'#05001a',bg2:'#0e003a',duration:'2h 01m'},
-];
+var allContent = window.allContent || [];
 
-var filtered = allContent.slice();
+var filtered = (window.allContent || []).slice();
 var currentView = 'grid';
-var currentSort = 'relevance';
-var currentGenre = '';
+var currentSort    = 'relevance';
+var currentGenre   = '';
+var currentPage    = 1;
+var PAGE_SIZE      = 24;
+var catalogView    = 'rows'; // 'rows' | 'grid' | 'list'
 var myList = [];
 var isPlaying = true;
 var progressInterval;
 var currentProgress = 35;
 
-// ── RENDER ────────────────────────────────────────
+
+// ══════════════════════════════════════════════════
+// ── OLEADA ENGINE ─────────────────────────────────
+// ══════════════════════════════════════════════════
+var _oleadaCategory = 'vivo';
+var _oleadaGroup    = '';
+var _oleadaHls      = null;
+var _oleadaActive   = null;
+
+var OLEADA_CATS = {
+  vivo:      function(c){ return c.m3uType==='live'||c.type==='Canal'; },
+  populares: function(c){ return c.m3uType==='live'||c.m3uType==='movie'||c.m3uType==='series'; },
+  series:    function(c){ return c.m3uType==='series'||c.type==='Serie'; },
+  pelicula:  function(c){ return c.m3uType==='movie'||c.type==='Película'; },
+  ninos:     function(c){ return /infantil|ni[ñn]o|kids|cartoon|junior/i.test((c.genre||'')+(c.group||'')+(c.title||'')); },
+  anime:     function(c){ return /anime|animaci[oó]/i.test((c.genre||'')+(c.group||'')+(c.title||'')); },
+  deporte:   function(c){ return /deport|sport|f[uú]tbol|foot|basket|tenis|liga|championship|cricket|rugby/i.test((c.genre||'')+(c.group||'')); },
+  noticias:  function(c){ return /noticias|news|informativ/i.test(c.genre+c.group); },
+  musica:    function(c){ return /m.sica|music/i.test(c.genre+c.group); },
+  todos:     function(c){ return true; }
+};
+
+function setOleadaCategory(cat){
+  _oleadaCategory = cat;
+  _oleadaGroup = '';
+  // Actualizar nav activo
+  document.querySelectorAll('.ola-nav-item').forEach(function(b){ b.classList.remove('active'); });
+  var btn = document.getElementById('ocat-'+cat);
+  if(btn) btn.classList.add('active');
+  renderOleada();
+}
+
+function renderOleada(){
+  // Solo ejecutar si estamos en la página del catálogo
+  if(!document.getElementById('oleada-app')) return;
+  var items = (window.allContent||allContent||[]);
+  var fn = OLEADA_CATS[_oleadaCategory] || OLEADA_CATS.todos;
+  var filtered = items.filter(fn);
+
+  // Filtrar por búsqueda
+  var q = (document.getElementById('search-input')||{}).value||'';
+  if(q.trim()) filtered = filtered.filter(function(c){ return (c.title+c.genre+c.group).toLowerCase().includes(q.toLowerCase()); });
+
+  // Si hay grupo activo, filtrar
+  if(_oleadaGroup) filtered = filtered.filter(function(c){ return (c.genre||c.group||'')=== _oleadaGroup; });
+
+  // Renderizar grupos (chips)
+  renderOleadaGroups(items.filter(fn));
+
+  // Renderizar lista derecha
+  renderOleadaList(filtered);
+
+  // Actualizar header
+  var titles = {vivo:'📡 Livestream',populares:'🔥 Populares',series:'🎬 Series',pelicula:'🎥 Películas',ninos:'🧒 Niños',anime:'✨ Anime',deporte:'⚽ Deporte',noticias:'📰 Noticias',musica:'🎵 Música',todos:'▤ Todo'};
+  var el = document.getElementById('ola-list-title');
+  if(el) el.textContent = titles[_oleadaCategory]||'Catálogo';
+  var cnt = document.getElementById('ola-list-count');
+  if(cnt) cnt.textContent = filtered.length + ' canales';
+}
+
+function renderOleadaGroups(items){
+  var row = document.getElementById('ola-groups-row');
+  if(!row) return;
+  var groups = {};
+  items.forEach(function(c){ var g=c.genre||c.group||'General'; groups[g]=(groups[g]||0)+1; });
+  var keys = Object.keys(groups).sort();
+  var html = '<button class="ola-group-chip'+(!_oleadaGroup?' active':'')+'" data-grp="" style="cursor:pointer;">Todos ('+items.length+')</button>';
+  keys.forEach(function(g){
+    var safe = g.replace(/"/g,'&quot;');
+    html += '<button class="ola-group-chip'+(_oleadaGroup===g?' active':'')+'" data-grp="'+safe+'" style="cursor:pointer;">'+g+' ('+groups[g]+')</button>';
+  });
+  row.innerHTML = html;
+  // Event delegation — evita onclick inline con comillas
+  row.querySelectorAll('.ola-group-chip').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      setOleadaGroup(this.getAttribute('data-grp')||'');
+    });
+  });
+}
+
+function setOleadaGroup(g){
+  _oleadaGroup = g;
+  document.querySelectorAll('.ola-group-chip').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.ola-group-chip').forEach(function(b){ if(b.textContent.startsWith(g||'Todos')) b.classList.add('active'); });
+  renderOleada();
+}
+
+function renderOleadaList(items){
+  var list = document.getElementById('ola-channel-list');
+  if(!list) return;
+  if(!list) return;
+  if(!items.length){
+    list.innerHTML = '<div style="padding:40px 16px;text-align:center;color:var(--text3);font-size:13px;">Sin resultados</div>';
+    return;
+  }
+  // Event delegation — click en cualquier .ola-ch
+  list.onclick = function(e){
+    var ch = e.target.closest('.ola-ch');
+    if(ch && ch.dataset.id) oleadaPlay(ch.dataset.id);
+  };
+  list.innerHTML = items.slice(0,200).map(function(item, i){
+    var logo = item.logo
+      ? '<img src="'+item.logo+'" style="width:100%;height:100%;object-fit:contain;border-radius:6px;" onerror="_imgErr(this)"><span data-fb="1" style="display:none;font-size:20px;">'+item.emoji+'</span>'
+      : '<span style="font-size:18px;">'+item.emoji+'</span>';
+    var isActive = _oleadaActive && _oleadaActive.id===item.id;
+    return '<div class="ola-ch'+(isActive?' active':'')+'" data-id="'+item.id+'" style="cursor:pointer;">'
+      +'<span class="ola-ch-num">'+(i+1)+'</span>'
+      +'<div class="ola-ch-logo">'+logo+'</div>'
+      +'<div class="ola-ch-info">'
+        +'<div class="ola-ch-name">'+item.title+'</div>'
+        +'<div class="ola-ch-group">'+(item.genre||item.group||'')+'</div>'
+      +'</div>'
+      +(isActive?'<div class="ola-ch-playing"></div>':'')
+    +'</div>';
+  }).join('');
+}
+
+function oleadaPlay(id){
+  var item = (window.allContent||allContent||[]).find(function(c){ return String(c.id)===String(id); });
+  if(!item) return;
+  _oleadaActive = item;
+
+  // Marcar activo en lista
+  document.querySelectorAll('.ola-ch').forEach(function(el){ el.classList.remove('active'); var dot=el.querySelector('.ola-ch-playing'); if(dot)dot.remove(); });
+  var activeEl = document.querySelector('.ola-ch[data-id="'+id+'"]');
+  if(activeEl){ activeEl.classList.add('active'); activeEl.insertAdjacentHTML('beforeend','<div class="ola-ch-playing"></div>'); }
+
+  // Actualizar info
+  document.getElementById('ola-channel-name').textContent = item.title;
+  document.getElementById('ola-info-name').textContent = item.title;
+  document.getElementById('ola-info-meta').textContent = (item.genre||item.group||'')+(item.type==='Canal'?' · 🔴 En vivo':'');
+
+  // Poster
+  var poster = document.getElementById('ola-poster');
+  var posterLogo = document.getElementById('ola-poster-logo');
+  var posterEmoji = document.getElementById('ola-poster-emoji');
+  var posterStatus = document.getElementById('ola-poster-status');
+  poster.style.display='flex';
+  document.getElementById('ola-poster-title').textContent = item.title;
+  posterStatus.textContent = '⏳ Conectando...';
+  if(item.logo){ posterLogo.src=item.logo; posterLogo.style.display=''; posterEmoji.style.display='none'; }
+  else { posterLogo.style.display='none'; posterEmoji.style.display=''; posterEmoji.textContent=item.emoji||'📺'; }
+
+  if(!item.stream){ posterStatus.textContent = '⚠️ Sin stream disponible'; return; }
+
+  // Reproducir
+  var url = item.stream; // ← declarar url antes de usarla
+  var video = document.getElementById('ola-video');
+  if(_oleadaHls){ _oleadaHls.destroy(); _oleadaHls=null; }
+  video.pause(); video.src='';
+
+  function onReady(){ poster.style.display='none'; video.play().catch(function(){}); }
+  function onErr(msg){ posterStatus.textContent='❌ '+(msg||'Error'); }
+
+  // Proxies CORS públicos para evitar bloqueos
+  var _attempts = 0;
+  // Estrategia: proxy propio primero → directo → proxy público
+  var _streamUrls = [];
+  // Intentar proxy propio primero, luego corsproxy.io, luego directo
+  if(PROXY_URL) _streamUrls.push(_proxyStream(url));
+  _streamUrls.push('https://corsproxy.io/?' + encodeURIComponent(url));
+  _streamUrls.push(url); // directo como último recurso
+
+  function tryStream(streamUrl){
+    if(_oleadaHls){ _oleadaHls.destroy(); _oleadaHls=null; }
+    video.pause(); video.src='';
+    posterStatus.innerHTML='<span style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse-dot 1.5s infinite;display:inline-block;"></span> Conectando' + (_attempts>0?' (intento '+(_attempts+1)+')':'') + '...';
+
+    function onFail(){
+      _attempts++;
+      if(_attempts < _streamUrls.length){
+        setTimeout(function(){ tryStream(_streamUrls[_attempts]); }, 400);
+      } else {
+        onErr('Stream no disponible');
+      }
+    }
+
+    // Proxy activo para esta sesión de intento
+    var _activeProxy = (streamUrl.includes(PROXY_URL)) ? PROXY_URL : null;
+
+    if(Hls.isSupported()){
+      _oleadaHls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: true,
+        maxBufferLength: 30,
+        xhrSetup: function(xhr, xhrUrl) {
+          if(_activeProxy && xhrUrl && !xhrUrl.startsWith(_activeProxy) && !xhrUrl.startsWith('blob:')) {
+            xhr.open('GET', _activeProxy + '/proxy?url=' + encodeURIComponent(xhrUrl), true);
+          }
+        },
+        fetchSetup: function(context, initParams) {
+          if(_activeProxy && context.url && !context.url.startsWith(_activeProxy) && !context.url.startsWith('blob:')) {
+            context.url = _activeProxy + '/proxy?url=' + encodeURIComponent(context.url);
+          }
+          return new Request(context.url, initParams);
+        }
+      });
+      _oleadaHls.loadSource(streamUrl);
+      _oleadaHls.attachMedia(video);
+      _oleadaHls.on(Hls.Events.MANIFEST_PARSED, onReady);
+      _oleadaHls.on(Hls.Events.ERROR, function(e,d){ if(d.fatal) onFail(); });
+    } else if(video.canPlayType('application/vnd.apple.mpegurl')){
+      video.src = streamUrl;
+      video.addEventListener('loadedmetadata', onReady, {once:true});
+      video.addEventListener('error', onFail, {once:true});
+    } else {
+      video.src = streamUrl;
+      video.addEventListener('canplay', onReady, {once:true});
+      video.addEventListener('error', onFail, {once:true});
+    }
+  }
+  tryStream(_streamUrls[0]);
+}
+
+function oleadaFullscreen(){
+  var v = document.getElementById('ola-video');
+  var w = document.getElementById('ola-video-wrap');
+  if((document.fullscreenElement||document.webkitFullscreenElement)===w){
+    (document.exitFullscreen||document.webkitExitFullscreen).call(document);
+  } else {
+    (w.requestFullscreen||w.webkitRequestFullscreen).call(w);
+  }
+}
+
+function handleSearch(){
+  if(window._currentPage==='catalog') renderOleada();
+}
+// ── FIN OLEADA ENGINE ──────────────────────────────
+
+// ── RENDER PRINCIPAL ─────────────────────────────
 function renderGrid(){
-  var grid = document.getElementById('content-grid');
+  if(typeof filtered === 'undefined') filtered = [];
+  if(typeof allContent === 'undefined') allContent = [];
+  if(window.allContent && window.allContent.length > 0) allContent = window.allContent;
   var count = document.getElementById('result-count');
   if(!filtered.length){
-    grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🔍</div><div class="empty-title">Sin resultados</div><div class="empty-sub">Intenta con otros filtros o términos de búsqueda</div></div>';
-    count.textContent = '0 títulos encontrados';
+    var msg = !allContent.length ? '⏳ Cargando catálogo...' : '0 títulos encontrados';
+    if(count) count.textContent = msg;
+    var viewRows = document.getElementById('view-rows');
+    var grid = document.getElementById('content-grid');
+    if(viewRows) viewRows.innerHTML = '<div style="padding:60px;text-align:center;color:var(--text2);font-size:15px;">'+(allContent.length?'🔍 Sin resultados — prueba otros filtros':'⏳ Conectando con el servidor...')+'</div>';
+    if(grid) grid.innerHTML = '';
     document.getElementById('pagination').innerHTML='';
     return;
   }
-  count.textContent = filtered.length + ' título' + (filtered.length!==1?'s':'') + ' encontrado' + (filtered.length!==1?'s':'');
-  if(currentView==='list') grid.classList.add('list-view');
-  else grid.classList.remove('list-view');
-  grid.innerHTML = filtered.slice(0,18).map(makeCard).join('');
+  if(count) count.textContent = filtered.length.toLocaleString() + ' título' + (filtered.length!==1?'s':'') + ' encontrado' + (filtered.length!==1?'s':'');
+  if(catalogView === 'rows'){
+    renderRowsView();
+    document.getElementById('view-rows').style.display='';
+    document.getElementById('content-grid').style.display='none';
+    document.getElementById('pagination').innerHTML='';
+  } else {
+    renderFlatView();
+    document.getElementById('view-rows').style.display='none';
+    document.getElementById('content-grid').style.display='';
+  }
+}
+
+// Vista filas por categoría (Magis style)
+function renderRowsView(){
+  var rows = document.getElementById('view-rows');
+  if(!rows) return;
+  // Agrupar por género/grupo
+  var groups = {};
+  filtered.forEach(function(item){
+    var key = item.genre || item.group || 'General';
+    if(!groups[key]) groups[key]=[];
+    groups[key].push(item);
+  });
+  // Ordenar: TV en Vivo primero, luego alfabético
+  var keys = Object.keys(groups).sort(function(a,b){
+    if(a==='Canal'||a==='TV en vivo') return -1;
+    if(b==='Canal'||b==='TV en vivo') return 1;
+    return a.localeCompare(b);
+  });
+  // Si hay canales, poner primero fila de TV en Vivo
+  var liveItems = filtered.filter(function(c){ return c.type==='Canal'||c.m3uType==='live'; });
+  var html = '';
+  if(liveItems.length && !currentGenre){
+    html += makeRow('🔴 TV en Vivo', liveItems, 'live');
+  }
+  // Resto de grupos (sin canales si ya se mostraron)
+  keys.forEach(function(key){
+    var items = groups[key].filter(function(c){ return c.type!=='Canal'&&c.m3uType!=='live'; });
+    if(items.length) html += makeRow(key, items, 'movie');
+  });
+  if(!html) html = '<div style="padding:40px;text-align:center;color:var(--text2);">🔍 Sin resultados</div>';
+  rows.innerHTML = html;
+  // Event delegation para botones "Ver todos"
+  if(rows) rows.addEventListener('click', function(e){
+    var btn = e.target.closest('[data-genre]');
+    if(btn) filterGenre(btn.getAttribute('data-genre'));
+  });
+}
+
+function makeRow(title, items, kind){
+  var cards = items.slice(0,20).map(function(item){
+    return kind==='live' ? makeLCard(item) : makeMCard(item);
+  }).join('');
+  var total = items.length;
+  return '<div class="cat-row">'
+    +'<div class="cat-row-header">'
+      +'<div class="cat-row-title">'+title+' <span style="font-size:12px;color:var(--text3);font-weight:400;">('+total+')</span></div>'
+      +(total>20?'<button class="cat-row-see-all" data-genre="__GENRE__" style="font-size:12px;color:var(--accent2);cursor:pointer;border:none;background:none;font-weight:600;">Ver todos →</button>'.replace('__GENRE__', (title||'').replace(/"/g,'')):'')
+    +'</div>'
+    +'<div class="cat-scroll">'+cards+'</div>'
+  +'</div>';
+}
+
+// Card TV en Vivo (cuadrada con logo)
+function _initLCardDelegation(container){
+  if(!container || container._lcardInit) return;
+  container._lcardInit = true;
+  container.addEventListener('click', function(e){
+    var card = e.target.closest('[data-pid]');
+    if(card) oleadaPlay(card.getAttribute('data-pid'));
+  });
+}
+
+function makeLCard(item){
+  var thumb = item.logo
+    ? '<img src="'+item.logo+'" style="width:65%;height:65%;object-fit:contain;position:relative;z-index:1;" onerror="_imgErr(this)"><span data-fb="1" style="display:none;font-size:36px;">'+item.emoji+'</span>'
+    : '<span class="lcard-emoji" style="font-size:38px;position:relative;z-index:1;">'+item.emoji+'</span>';
+  return '<div class="lcard" data-pid="'+item.id+'" style="cursor:pointer;">'
+    +'<div class="lcard-thumb" style="background:linear-gradient(135deg,'+item.bg1+','+item.bg2+');">'
+      +'<span class="lcard-live">● EN VIVO</span>'
+      +thumb
+    +'</div>'
+    +'<div class="lcard-name">'+item.title+'</div>'
+    +'<div class="lcard-group">'+( item.genre||item.group||'TV')+'</div>'
+  +'</div>';
+}
+
+// Card Película/Serie (vertical)
+function makeMCard(item){
+  var thumb = item.logo
+    ? '<img src="'+item.logo+'" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.remove()">'
+    : '<span style="font-size:44px;position:relative;z-index:1;">'+item.emoji+'</span>';
+  return '<div class="mcard" data-pid="'+item.id+'" style="cursor:pointer;">'
+    +'<div class="mcard-thumb" style="background:linear-gradient(135deg,'+item.bg1+','+item.bg2+');">'
+      +thumb
+      +'<div class="mcard-overlay"><div class="mcard-play">▶</div></div>'
+      +'<div class="mcard-badge '+(item.badge==='GRATIS'?'badge-free':item.badge==='NUEVO'?'badge-new':'badge-pro')+'">'+item.badge+'</div>'
+    +'</div>'
+    +'<div class="mcard-info">'
+      +'<div class="mcard-title">'+item.title+'</div>'
+      +'<div class="mcard-meta">'+item.genre+' · '+item.year+'</div>'
+    +'</div>'
+  +'</div>';
+}
+
+// Vista flat grid/lista
+function renderFlatView(){
+  var grid = document.getElementById('content-grid');
+  var isLive = currentGenre==='Canal' || (filtered.length && filtered[0] && (filtered[0].type==='Canal'||filtered[0].m3uType==='live'));
+  if(catalogView==='grid'){
+    grid.className = 'grid-view-wrap'+(isLive?' tv-grid':'');
+    var start=(currentPage-1)*PAGE_SIZE;
+    grid.innerHTML = filtered.slice(start,start+PAGE_SIZE).map(function(item){
+      return isLive ? makeLCard(item) : makeMCard(item);
+    }).join('');
+  } else {
+    // Lista
+    grid.className = '';
+    grid.style.display = '';
+    var start=(currentPage-1)*PAGE_SIZE;
+    grid.innerHTML = filtered.slice(start,start+PAGE_SIZE).map(function(item){
+      return '<div style="display:flex;gap:14px;align-items:center;padding:12px 14px;background:var(--s1);border-radius:10px;cursor:pointer;margin-bottom:8px;transition:.2s;" data-pid="'+item.id+'">'
+        +'<div style="width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,'+item.bg1+','+item.bg2+');display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">'
+                +(item.logo?'<img src="'+item.logo+'" style="width:80%;height:80%;object-fit:contain;" onerror="_imgErrHide(this)">':'<span style="font-size:26px;">'+item.emoji+'</span>')
+        +'</div>'
+        +'<div style="flex:1;min-width:0;">'
+          +'<div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-display);">'+item.title+'</div>'
+          +'<div style="font-size:12px;color:var(--text2);margin-top:2px;">'+( item.genre||'')+(item.type?' · '+item.type:'')+'</div>'
+        +'</div>'
+        +'<span style="font-size:11px;background:'+(item.badge==='GRATIS'?'rgba(16,185,129,0.15)':'rgba(123,47,255,0.15)')+';color:'+(item.badge==='GRATIS'?'#10B981':'var(--accent2)')+';padding:3px 10px;border-radius:6px;font-weight:700;font-family:var(--font-mono);">'+item.badge+'</span>'
+        +'<button style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;">▶ Ver</button>'
+      +'</div>';
+    }).join('');
+  }
   renderPagination();
+}
+
+function setCatalogView(v){
+  catalogView = v;
+  ['rows','grid','list'].forEach(function(t){
+    var el = document.getElementById('tab-'+t);
+    if(el) el.classList.toggle('active', t===v);
+  });
+  currentPage = 1;
+  renderGrid();
 }
 
 function makeCard(item){
   var inList = (myList||[]).includes(item.id);
   if(currentView==='list'){
-    return '<div class="ccard" onclick="openPlayer('+item.id+')">'
+    return '<div class="ccard" data-pid="'+item.id+'" style="cursor:pointer;">'  
       +'<div class="ccard-thumb"><div class="thumb-bg" style="background:linear-gradient(135deg,'+item.bg1+','+item.bg2+')"></div>'
         +'<div style="position:relative;z-index:1;font-size:32px;">'+item.emoji+'</div>'
         +'<div class="ccard-overlay"><div class="play-btn">▶</div></div>'
@@ -2382,15 +3010,18 @@ function makeCard(item){
         +'<div class="ccard-desc">'+item.desc+'</div>'
       +'</div>'
       +'<div style="padding:14px;display:flex;flex-direction:column;gap:8px;justify-content:center;flex-shrink:0;">'
-        +'<button onclick="event.stopPropagation();openPlayer('+item.id+')" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">▶ Ver ahora</button>'
+        +'<button data-pid="'+item.id+'" data-stop="1" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">▶ Ver ahora</button>'
         +'<button onclick="event.stopPropagation();toggleList('+item.id+')" style="background:var(--s2);color:var(--text2);border:1px solid var(--border);border-radius:8px;padding:7px 16px;font-size:12px;cursor:pointer;white-space:nowrap;">'+(inList?'✓ En mi lista':'+ Mi lista')+'</button>'
       +'</div>'
     +'</div>';
   }
-  return '<div class="ccard" onclick="openPlayer('+item.id+')">'
+  var thumbContent = item.logo
+    ? '<img src="'+item.logo+'" style="position:relative;z-index:1;width:64px;height:64px;border-radius:10px;object-fit:cover;" onerror="_imgErr(this)"><span data-fb="1" style="display:none;font-size:40px;">'+item.emoji+'</span>'
+    : '<div style="position:relative;z-index:1;font-size:44px;">'+item.emoji+'</div>';
+  return '<div class="ccard" data-pid="'+item.id+'" style="cursor:pointer;">'
     +'<div class="ccard-thumb">'
       +'<div class="thumb-bg" style="background:linear-gradient(135deg,'+item.bg1+','+item.bg2+')"></div>'
-      +'<div style="position:relative;z-index:1;font-size:44px;">'+item.emoji+'</div>'
+      +thumbContent
       +'<div class="ccard-overlay">'
         +'<div class="play-btn">▶</div>'
         +'<div class="ccard-actions">'
@@ -2412,14 +3043,19 @@ function renderPagination(){
   var pages = Math.ceil(filtered.length / 18);
   if(pages<=1){pag.innerHTML='';return;}
   var html='<button class="page-btn">‹</button>';
-  for(var i=1;i<=Math.min(pages,5);i++) html+='<button class="page-btn'+(i===1?' active':'')+'">'+i+'</button>';
-  if(pages>5) html+='<span style="color:var(--text3);font-size:13px;">...</span><button class="page-btn">'+pages+'</button>';
+  var startP = Math.max(1, currentPage-2);
+  var endP   = Math.min(pages, startP+4);
+  for(var i=startP;i<=endP;i++) html+='<button class="page-btn'+(i===currentPage?' active':'')+'">'+i+'</button>';
+  if(endP<pages) html+='<span style="color:var(--text3);font-size:13px;">...</span><button class="page-btn">'+pages+'</button>';
   html+='<button class="page-btn">›</button>';
   pag.innerHTML=html;
   pag.querySelectorAll('.page-btn').forEach(function(b){
     b.addEventListener('click',function(){
-      pag.querySelectorAll('.page-btn').forEach(function(x){x.classList.remove('active');});
-      this.classList.add('active');
+      var txt = this.textContent.trim();
+      if(txt==='‹'){ if(currentPage>1) currentPage--; }
+      else if(txt==='›'){ if(currentPage<pages) currentPage++; }
+      else { var n=parseInt(txt); if(!isNaN(n)) currentPage=n; }
+      renderGrid();
       window.scrollTo({top:0,behavior:'smooth'});
     });
   });
@@ -2427,13 +3063,23 @@ function renderPagination(){
 
 // ── FILTERS ──────────────────────────────────────
 function applyFilters(){
-  var year   = document.getElementById('filter-year').value;
-  var rating = document.getElementById('filter-rating').value;
-  var type   = document.getElementById('filter-type').value;
-  var access = document.getElementById('filter-access').value;
-  var search = document.getElementById('search-input').value.toLowerCase().trim();
+  // Safety guards
+  if(typeof allContent === 'undefined') allContent = [];
+  if(typeof filtered === 'undefined') filtered = [];
+  if(window.allContent && window.allContent.length > 0) allContent = window.allContent;
+
+  var _v = function(id){ var el=document.getElementById(id); return el?el.value:''; };
+  var year   = _v('filter-year');
+  var rating = _v('filter-rating');
+  var type   = _v('filter-type');
+  var access = _v('filter-access');
+  var search = _v('search-input').toLowerCase().trim();
+  // Sincronizar con Firebase
+  if(window.allContent && window.allContent.length > 0) allContent = window.allContent;
   filtered = allContent.filter(function(c){
-    if(currentGenre && c.genre!==currentGenre) return false;
+    // TV en Vivo filtra por type='Canal'
+    if(currentGenre==='Canal') return c.type==='Canal' || c.m3uType==='live';
+    if(currentGenre && currentGenre!=='Canal' && c.genre!==currentGenre) return false;
     if(year && String(c.year)!==year) return false;
     if(rating && c.rating<parseFloat(rating)) return false;
     if(type && c.type!==type) return false;
@@ -2444,25 +3090,31 @@ function applyFilters(){
   if(currentSort==='rating') filtered.sort(function(a,b){return b.rating-a.rating;});
   else if(currentSort==='year') filtered.sort(function(a,b){return b.year-a.year;});
   else if(currentSort==='title') filtered.sort(function(a,b){return a.title.localeCompare(b.title);});
+  currentPage = 1;
   renderGrid();
 }
 
 function filterGenre(genre){
-  currentGenre=genre;
-  document.querySelectorAll('.genre-pill').forEach(function(p){p.classList.remove('active');});
+  currentGenre = genre;
+  currentPage  = 1;
+  // Pills del catálogo nuevo
+  document.querySelectorAll('.cat-pill,.genre-pill').forEach(function(p){p.classList.remove('active');});
   if(!genre){
-    document.querySelector('.genre-pill').classList.add('active');
-    document.getElementById('active-genre-label').textContent='';
+    var first = document.querySelector('.cat-pill,.genre-pill');
+    if(first) first.classList.add('active');
   } else {
-    var pills=document.querySelectorAll('.genre-pill');
-    pills.forEach(function(p){if((p.textContent||'').includes(genre))p.classList.add('active');});
-    document.getElementById('active-genre-label').textContent=' — '+genre;
+    document.querySelectorAll('.cat-pill,.genre-pill').forEach(function(p){
+      if((p.textContent||'').includes(genre==='Canal'?'TV en Vivo':genre)) p.classList.add('active');
+    });
   }
+  // Si filtra por algo, cambiar a grid para ver todo
+  if(genre && catalogView==='rows') setCatalogView('grid');
   applyFilters();
 }
 
 function handleSearch(){
-  applyFilters();
+  if(typeof renderOleada==='function' && window._currentPage==='catalog') renderOleada();
+  else applyFilters();
 }
 
 function toggleSort(){
@@ -2493,63 +3145,132 @@ function toggleList(id){
   renderGrid();
 }
 
-// ── PLAYER ───────────────────────────────────────
+// ── PLAYER MODAL (catálogo) ──────────────────────
+var _modalHls = null;
+
 function openPlayer(id){
-  var item=allContent.find(function(c){return c.id===id;});
-  if(!item) return;
+  var item = allContent.find(function(c){ return c.id===id || c.id===String(id) || String(c.id)===String(id); });
+  if(!item){ showToast('❌ Contenido no encontrado'); return; }
   if(item.badge==='PRO'){
     showToast('⭐ Este contenido es PRO — Actualiza tu plan');
     return;
   }
-  document.getElementById('player-title').textContent=item.title;
-  document.getElementById('player-emoji').textContent=item.emoji;
-  document.getElementById('player-movie-title').textContent=item.title;
+  if(!item.stream){
+    showToast('⚠️ Este título no tiene stream disponible');
+    return;
+  }
+
+  // Llenar UI
+  document.getElementById('player-title').textContent = item.title;
+  document.getElementById('player-emoji').textContent = item.emoji || '🎬';
+  document.getElementById('player-movie-title').textContent = item.title;
+  document.getElementById('player-movie-title-emoji').textContent = item.emoji||'🎬';
+  document.getElementById('modal-meta').textContent = (item.genre||'') + (item.year?' · '+item.year:'') + (item.type==='Canal'?' · 🔴 En vivo':'');
+  document.getElementById('modal-status').innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse-dot 1.5s infinite;display:inline-block;"></span> Conectando stream...';
+
+  // Logo del canal si existe
+  var logoEl = document.getElementById('modal-logo');
+  var logoEl2 = document.getElementById('modal-poster-logo');
+  if(item.logo){
+    logoEl.src=item.logo; logoEl.style.display='block';
+    if(logoEl2){ logoEl2.src=item.logo; logoEl2.style.display='block'; logoEl2.nextSibling&&(logoEl2.nextSibling.style.display='none'); }
+  } else {
+    logoEl.style.display='none';
+    if(logoEl2) logoEl2.style.display='none';
+  }
+
+  // Mostrar poster mientras carga
+  document.getElementById('modal-poster').style.display='flex';
   document.getElementById('player-modal').classList.add('open');
-  isPlaying=true;
-  document.getElementById('play-btn').textContent='⏸';
-  currentProgress=Math.floor(Math.random()*40)+10;
-  updateProgress();
-  startProgressTimer();
+
+  // Cargar video
+  var video = document.getElementById('modal-video');
+  if(_modalHls){ _modalHls.destroy(); _modalHls=null; }
+  video.pause();
+  video.src='';
+
+  var url = item.stream;
+
+  function onVideoReady(){
+    document.getElementById('modal-status').innerHTML = '<span style="color:#10B981;">✅</span> Conectado';
+    setTimeout(function(){ document.getElementById('modal-poster').style.display='none'; }, 600);
+    video.play().catch(function(e){ console.warn('Autoplay bloqueado:', e.message); });
+  }
+
+  function onVideoError(msg){
+    document.getElementById('modal-status').textContent = '❌ ' + (msg||'Error al cargar el stream');
+    console.warn('[Player] Error stream:', url, msg);
+  }
+
+  // Intentar con proxy primero, luego directo
+  var _mAttempts = 0;
+  var _mUrls = [];
+  if(PROXY_URL) _mUrls.push(_proxyStream(url));
+  _mUrls.push('https://corsproxy.io/?' + encodeURIComponent(url));
+  _mUrls.push(url);
+
+  function _mTryStream(streamUrl){
+    if(_modalHls){ _modalHls.destroy(); _modalHls=null; }
+    video.pause(); video.src='';
+
+    function _mFail(){
+      _mAttempts++;
+      if(_mAttempts < _mUrls.length){
+        setTimeout(function(){ _mTryStream(_mUrls[_mAttempts]); }, 400);
+      } else {
+        onVideoError('Stream no disponible');
+      }
+    }
+
+    var _mActiveProxy = (streamUrl.includes(PROXY_URL)) ? PROXY_URL : null;
+
+    if(Hls.isSupported()){
+      _modalHls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: true,
+        maxBufferLength: 30,
+        xhrSetup: function(xhr, xhrUrl){
+          if(_mActiveProxy && xhrUrl && !xhrUrl.startsWith(_mActiveProxy) && !xhrUrl.startsWith('blob:')){
+            xhr.open('GET', _mActiveProxy + '/proxy?url=' + encodeURIComponent(xhrUrl), true);
+          }
+        },
+        fetchSetup: function(context, initParams){
+          if(_mActiveProxy && context.url && !context.url.startsWith(_mActiveProxy) && !context.url.startsWith('blob:')){
+            context.url = _mActiveProxy + '/proxy?url=' + encodeURIComponent(context.url);
+          }
+          return new Request(context.url, initParams);
+        }
+      });
+      _modalHls.loadSource(streamUrl);
+      _modalHls.attachMedia(video);
+      _modalHls.on(Hls.Events.MANIFEST_PARSED, onVideoReady);
+      _modalHls.on(Hls.Events.ERROR, function(e, data){ if(data.fatal) _mFail(); });
+    } else if(video.canPlayType('application/vnd.apple.mpegurl')){
+      video.src = streamUrl;
+      video.addEventListener('loadedmetadata', onVideoReady, {once:true});
+      video.addEventListener('error', _mFail, {once:true});
+    } else {
+      video.src = streamUrl;
+      video.addEventListener('canplay', onVideoReady, {once:true});
+      video.addEventListener('error', _mFail, {once:true});
+    }
+  }
+  _mTryStream(_mUrls[0]);
 }
 
 function closePlayer(){
   document.getElementById('player-modal').classList.remove('open');
-  clearInterval(progressInterval);
+  var video = document.getElementById('modal-video');
+  if(_modalHls){ _modalHls.destroy(); _modalHls=null; }
+  video.pause();
+  video.src='';
+  document.getElementById('modal-poster').style.display='flex';
 }
 
-function togglePlay(){
-  isPlaying=!isPlaying;
-  document.getElementById('play-btn').textContent=isPlaying?'⏸':'▶';
-  if(isPlaying) startProgressTimer(); else clearInterval(progressInterval);
-}
-
-function startProgressTimer(){
-  clearInterval(progressInterval);
-  progressInterval=setInterval(function(){
-    if(currentProgress<100){ currentProgress+=0.05; updateProgress(); }
-    else clearInterval(progressInterval);
-  },500);
-}
-
-function updateProgress(){
-  document.getElementById('progress-fill').style.width=Math.min(currentProgress,100)+'%';
-  var totalSec=6440;
-  var cur=Math.floor(totalSec*currentProgress/100);
-  var m=Math.floor(cur/60),s=cur%60;
-  document.getElementById('current-time').textContent=m+':'+(s<10?'0':'')+s;
-}
-
-function seekVideo(e){
-  var bar=e.currentTarget;
-  var rect=bar.getBoundingClientRect();
-  currentProgress=((e.clientX-rect.left)/rect.width)*100;
-  updateProgress();
-}
-
-function skipVideo(sec){
-  var totalSec=6440;
-  currentProgress=Math.max(0,Math.min(100,currentProgress+(sec/totalSec*100)));
-  updateProgress();
+function toggleModalFullscreen(){
+  var video = document.getElementById('modal-video');
+  if(video.requestFullscreen) video.requestFullscreen();
+  else if(video.webkitRequestFullscreen) video.webkitRequestFullscreen();
 }
 
 // ── TOAST ─────────────────────────────────────────
@@ -2562,9 +3283,8 @@ function showToast(msg){
 }
 
 // Close player on overlay click
-document.getElementById('player-modal').addEventListener('click',function(e){
-  if(e.target===this) closePlayer();
-});
+var _pm = document.getElementById('player-modal');
+if(_pm) _pm.addEventListener('click',function(e){ if(e.target===this) closePlayer(); });
 
 // Init
 if(typeof allContent !== 'undefined') renderGrid();
@@ -2646,9 +3366,12 @@ function init(){
 }
 
 function loadMovie(movie){
+  if(!movie) return;
   currentMovie = movie;
   document.title = movie.title + ' — StreamVibe';
-  document.getElementById('nav-movie-title').textContent = movie.title;
+  var _el = function(id){ return document.getElementById(id); };
+  if(!_el('nav-movie-title')) return; // player no está en el DOM
+  _el('nav-movie-title').textContent = movie.title;
   document.getElementById('poster-emoji').textContent = movie.emoji;
   document.getElementById('poster-title').textContent = movie.title;
   document.getElementById('poster-meta').textContent = movie.type + ' · ' + movie.year + ' · ⭐ ' + movie.rating + ' · ' + movie.duration;
@@ -3078,8 +3801,8 @@ document.addEventListener('keydown', function(e){
   }
 });
 
-// Init
-init();
+// Init — solo ejecutar si los elementos del player están en el DOM
+if(document.getElementById('nav-movie-title')) init();
 
 // ─── AUTH ───────────────────────────
 // ══════════════════════════════════════════════════
@@ -3092,36 +3815,27 @@ init();
 var auth = null;
 var db   = null;
 
-function initFirebase(){
-  if(typeof firebase === 'undefined'){ setTimeout(initFirebase, 300); return; }
-  try{
-    var app = firebase.apps.length ? firebase.app() : 
-    auth = app.auth();
-    db   = app.firestore();
-    // Persistencia de sesión
-    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-    // Observar cambios de auth
-    auth.onAuthStateChanged(onAuthStateChanged);
-    console.log('[StreamVibe] Firebase Auth listo');
-  }catch(e){
-    console.error('[StreamVibe] Firebase error:', e);
-    showToast('⚠️ Firebase no configurado — modo demo activo','warning');
-    enableDemoMode();
-  }
+function initFirebaseAuth(){
+  // Usar Firebase ya inicializado por el SPA router
+  if(window._auth){ auth = window._auth; window.auth = window._auth; }
+  if(window._db)  { db   = window._db;   window.db   = window._db; }
+  console.log('[StreamVibe Auth] Firebase vinculado desde SPA router');
 }
 
 function onAuthStateChanged(user){
   if(user){
-    showProfile(user);
-  } else {
-    showAuthForm();
+    // Solo mostrar perfil si está en la página de auth
+    if(window._currentPage === 'auth'){
+      showProfile(user);
+    }
   }
+  // Si no hay sesión: no hacer nada — el catálogo es público
 }
 
 // ── AUTH STATE UI ─────────────────────────────────
 function showProfile(user){
-  // In SPA mode, navigate to auth page and show profile
-  if(typeof navigate === 'function'){
+  // Solo navegar a auth/profile si estamos en la página de auth
+  if(typeof navigate === 'function' && window._currentPage === 'auth'){
     navigate('auth', 'profile');
   }
   var pp = document.getElementById('profile-page');
@@ -3413,11 +4127,11 @@ function showToast(msg, type){
   _tt=setTimeout(function(){t.classList.remove('show');},3500);
 }
 
-// Init
+// Init Auth
 if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',initFirebase);
+  document.addEventListener('DOMContentLoaded',initFirebaseAuth);
 }else{
-  setTimeout(initFirebase,100);
+  setTimeout(initFirebaseAuth,100);
 }
 
 // ─── PAYMENTS ───────────────────────────
