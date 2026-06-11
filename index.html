@@ -2178,7 +2178,25 @@ window.openModal = function(type) {
 // ── PROXY CONFIG ─────────────────────────────────
 // Cambia esta URL por la de tu proxy en Railway/Render
 var PROXY_URL = window.STREAMVIBE_PROXY || 'https://streamvibe-proxy-production.up.railway.app';
-// Ejemplo: var PROXY_URL = 'https://streamvibe-proxy.up.railway.app';
+// Verificar si el proxy responde correctamente
+(function(){
+  if(!PROXY_URL) return;
+  fetch(PROXY_URL + '/proxy?url=https://example.com', {method:'GET', cache:'no-store', signal: AbortSignal.timeout ? AbortSignal.timeout(4000) : undefined})
+    .then(function(r){ 
+      return r.text().then(function(t){ 
+        if(t.includes('not in allowlist') || t.includes('Forbidden') || r.status===403){
+          console.warn('[StreamVibe] Proxy con allowlist restrictiva, usando fallbacks directos');
+          window.PROXY_URL = PROXY_URL = '';
+        } else {
+          console.log('[StreamVibe] Proxy OK:', PROXY_URL);
+        }
+      });
+    })
+    .catch(function(){ 
+      console.warn('[StreamVibe] Proxy no disponible, usando fallbacks');
+      window.PROXY_URL = PROXY_URL = '';
+    });
+})();
 
 function _proxyStream(url) {
   if (!PROXY_URL || !url) return url;
@@ -2742,9 +2760,10 @@ function oleadaPlay(id){
   var _attempts = 0;
   // Estrategia: proxy propio primero → directo → proxy público
   var _streamUrls = [];
-  if(PROXY_URL) _streamUrls.push(_proxyStream(url)); // proxy propio primero
-  _streamUrls.push(url); // directo como fallback
+  // Intentar proxy propio primero, luego corsproxy.io, luego directo
+  if(PROXY_URL) _streamUrls.push(_proxyStream(url));
   _streamUrls.push('https://corsproxy.io/?' + encodeURIComponent(url));
+  _streamUrls.push(url); // directo como último recurso
 
   function tryStream(streamUrl){
     if(_oleadaHls){ _oleadaHls.destroy(); _oleadaHls=null; }
@@ -2754,26 +2773,28 @@ function oleadaPlay(id){
     function onFail(){
       _attempts++;
       if(_attempts < _streamUrls.length){
-        setTimeout(function(){ tryStream(_streamUrls[_attempts]); }, 600);
+        setTimeout(function(){ tryStream(_streamUrls[_attempts]); }, 400);
       } else {
-        onErr(PROXY_URL ? 'Stream no disponible' : 'Stream bloqueado — configura un proxy en PROXY_URL');
+        onErr('Stream no disponible');
       }
     }
+
+    // Proxy activo para esta sesión de intento
+    var _activeProxy = (streamUrl.includes(PROXY_URL)) ? PROXY_URL : null;
 
     if(Hls.isSupported()){
       _oleadaHls = new Hls({
         enableWorker: true,
         lowLatencyMode: true,
-        // Interceptar TODAS las peticiones (segmentos incluidos) para pasarlas por el proxy
+        maxBufferLength: 30,
         xhrSetup: function(xhr, xhrUrl) {
-          if(PROXY_URL && xhrUrl && !xhrUrl.startsWith(PROXY_URL)) {
-            var proxied = PROXY_URL + '/proxy?url=' + encodeURIComponent(xhrUrl);
-            xhr.open('GET', proxied, true);
+          if(_activeProxy && xhrUrl && !xhrUrl.startsWith(_activeProxy) && !xhrUrl.startsWith('blob:')) {
+            xhr.open('GET', _activeProxy + '/proxy?url=' + encodeURIComponent(xhrUrl), true);
           }
         },
         fetchSetup: function(context, initParams) {
-          if(PROXY_URL && context.url && !context.url.startsWith(PROXY_URL)) {
-            context.url = PROXY_URL + '/proxy?url=' + encodeURIComponent(context.url);
+          if(_activeProxy && context.url && !context.url.startsWith(_activeProxy) && !context.url.startsWith('blob:')) {
+            context.url = _activeProxy + '/proxy?url=' + encodeURIComponent(context.url);
           }
           return new Request(context.url, initParams);
         }
@@ -3181,25 +3202,60 @@ function openPlayer(id){
     console.warn('[Player] Error stream:', url, msg);
   }
 
-  if(Hls.isSupported() && (url.includes('.m3u8') || url.includes('m3u'))){
-    _modalHls = new Hls({ enableWorker:true, lowLatencyMode:true });
-    _modalHls.loadSource(url);
-    _modalHls.attachMedia(video);
-    _modalHls.on(Hls.Events.MANIFEST_PARSED, onVideoReady);
-    _modalHls.on(Hls.Events.ERROR, function(e, data){
-      if(data.fatal) onVideoError('Stream no compatible o sin acceso');
-    });
-  } else if(video.canPlayType('application/vnd.apple.mpegurl')){
-    // Safari nativo HLS
-    video.src = url;
-    video.addEventListener('loadedmetadata', onVideoReady, {once:true});
-    video.addEventListener('error', function(){ onVideoError('Error al cargar'); }, {once:true});
-  } else {
-    // Intentar reproducción directa (MP4, etc.)
-    video.src = url;
-    video.addEventListener('canplay', onVideoReady, {once:true});
-    video.addEventListener('error', function(){ onVideoError('Formato no soportado'); }, {once:true});
+  // Intentar con proxy primero, luego directo
+  var _mAttempts = 0;
+  var _mUrls = [];
+  if(PROXY_URL) _mUrls.push(_proxyStream(url));
+  _mUrls.push('https://corsproxy.io/?' + encodeURIComponent(url));
+  _mUrls.push(url);
+
+  function _mTryStream(streamUrl){
+    if(_modalHls){ _modalHls.destroy(); _modalHls=null; }
+    video.pause(); video.src='';
+
+    function _mFail(){
+      _mAttempts++;
+      if(_mAttempts < _mUrls.length){
+        setTimeout(function(){ _mTryStream(_mUrls[_mAttempts]); }, 400);
+      } else {
+        onVideoError('Stream no disponible');
+      }
+    }
+
+    var _mActiveProxy = (streamUrl.includes(PROXY_URL)) ? PROXY_URL : null;
+
+    if(Hls.isSupported()){
+      _modalHls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: true,
+        maxBufferLength: 30,
+        xhrSetup: function(xhr, xhrUrl){
+          if(_mActiveProxy && xhrUrl && !xhrUrl.startsWith(_mActiveProxy) && !xhrUrl.startsWith('blob:')){
+            xhr.open('GET', _mActiveProxy + '/proxy?url=' + encodeURIComponent(xhrUrl), true);
+          }
+        },
+        fetchSetup: function(context, initParams){
+          if(_mActiveProxy && context.url && !context.url.startsWith(_mActiveProxy) && !context.url.startsWith('blob:')){
+            context.url = _mActiveProxy + '/proxy?url=' + encodeURIComponent(context.url);
+          }
+          return new Request(context.url, initParams);
+        }
+      });
+      _modalHls.loadSource(streamUrl);
+      _modalHls.attachMedia(video);
+      _modalHls.on(Hls.Events.MANIFEST_PARSED, onVideoReady);
+      _modalHls.on(Hls.Events.ERROR, function(e, data){ if(data.fatal) _mFail(); });
+    } else if(video.canPlayType('application/vnd.apple.mpegurl')){
+      video.src = streamUrl;
+      video.addEventListener('loadedmetadata', onVideoReady, {once:true});
+      video.addEventListener('error', _mFail, {once:true});
+    } else {
+      video.src = streamUrl;
+      video.addEventListener('canplay', onVideoReady, {once:true});
+      video.addEventListener('error', _mFail, {once:true});
+    }
   }
+  _mTryStream(_mUrls[0]);
 }
 
 function closePlayer(){
