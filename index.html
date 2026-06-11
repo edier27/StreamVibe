@@ -270,8 +270,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 32px;display:fl
 
 /* Centro */
 #oleada-center{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;background:#000;}
-#ola-video-wrap{position:relative;background:#000;flex:1;min-height:0;}
-#ola-video{width:100%;height:100%;object-fit:contain;display:block;background:#000;}
+#ola-video-wrap{position:relative;background:#000;width:100%;flex:1;min-height:0;overflow:hidden;}
+#ola-video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000;}
 #ola-poster{position:absolute;inset:0;background:linear-gradient(135deg,#0a0a1a,#1a0545);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:3;}
 #ola-poster-logo-wrap{width:80px;height:80px;border-radius:16px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;overflow:hidden;}
 #ola-poster-logo{width:80%;height:80%;object-fit:contain;}
@@ -289,7 +289,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 32px;display:fl
 .ola-group-chip:hover,.ola-group-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;}
 
 /* Lista derecha */
-#oleada-list{width:300px;flex-shrink:0;background:#111118;border-left:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;overflow:hidden;height:100%;}
+#oleada-list{width:280px;flex-shrink:0;background:#111118;border-left:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;overflow:hidden;}
 .ola-list-header{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
 .ola-list-header span:first-child{font-family:var(--font-display);font-size:14px;font-weight:700;}
 #ola-channel-list{flex:1;overflow-y:auto;padding:6px 0;}
@@ -968,7 +968,7 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
 /* ═══ SPA NAVIGATION ═══ */
 .page{display:none;}
 .page.active{display:block;}
-#page-catalog.active{display:block;height:100vh;overflow:hidden;padding-top:0;}
+#page-catalog.active{display:block;height:100vh;overflow:hidden;}
 #page-landing .hero{min-height:100vh;}
 .spa-nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:14px 32px;display:flex;align-items:center;gap:20px;background:rgba(10,10,15,0.95);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.08);}
 .spa-logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;background:linear-gradient(135deg,#7B2FFF,#FF6B35);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;flex-shrink:0;}
@@ -2175,6 +2175,20 @@ window.openModal = function(type) {
 };
 
 // ── FIREBASE CONFIG ───────────────────────────────
+// ── PROXY CONFIG ─────────────────────────────────
+// Cambia esta URL por la de tu proxy en Railway/Render
+var PROXY_URL = window.STREAMVIBE_PROXY || 'https://streamvibe-proxy-production.up.railway.app';
+// Ejemplo: var PROXY_URL = 'https://streamvibe-proxy.up.railway.app';
+
+function _proxyStream(url) {
+  if (!PROXY_URL || !url) return url;
+  if (url.includes('.m3u8') || url.includes('m3u')) {
+    return PROXY_URL + '/m3u8?url=' + encodeURIComponent(url);
+  }
+  return PROXY_URL + '/proxy?url=' + encodeURIComponent(url);
+}
+// ─────────────────────────────────────────────────
+
 var FIREBASE_CONFIG = {
   apiKey:            "AIzaSyAzOoK99y6L95sFAKZFZ0wY42Ljw2YEOM8",
   authDomain:        "globalacce-37997.firebaseapp.com",
@@ -2718,20 +2732,44 @@ function oleadaPlay(id){
   function onReady(){ poster.style.display='none'; video.play().catch(function(){}); }
   function onErr(msg){ posterStatus.textContent='❌ '+(msg||'Error'); }
 
-  if(Hls.isSupported()){
-    _oleadaHls = new Hls({enableWorker:true,lowLatencyMode:true});
-    _oleadaHls.loadSource(item.stream);
-    _oleadaHls.attachMedia(video);
-    _oleadaHls.on(Hls.Events.MANIFEST_PARSED, onReady);
-    _oleadaHls.on(Hls.Events.ERROR, function(e,d){ if(d.fatal) onErr('Stream no disponible'); });
-  } else if(video.canPlayType('application/vnd.apple.mpegurl')){
-    video.src=item.stream;
-    video.addEventListener('loadedmetadata',onReady,{once:true});
-  } else {
-    video.src=item.stream;
-    video.addEventListener('canplay',onReady,{once:true});
-    video.addEventListener('error',function(){ onErr(); },{once:true});
+  // Proxies CORS públicos para evitar bloqueos
+  var _attempts = 0;
+  // Estrategia: directo → proxy propio → proxies públicos
+  var _streamUrls = [url];
+  if(PROXY_URL) _streamUrls.push(_proxyStream(url));
+  _streamUrls.push('https://corsproxy.io/?' + encodeURIComponent(url));
+
+  function tryStream(streamUrl){
+    if(_oleadaHls){ _oleadaHls.destroy(); _oleadaHls=null; }
+    video.pause(); video.src='';
+    posterStatus.innerHTML='<span style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse-dot 1.5s infinite;display:inline-block;"></span> Conectando' + (_attempts>0?' (intento '+(_attempts+1)+')':'') + '...';
+
+    function onFail(){
+      _attempts++;
+      if(_attempts < _streamUrls.length){
+        setTimeout(function(){ tryStream(_streamUrls[_attempts]); }, 600);
+      } else {
+        onErr(PROXY_URL ? 'Stream no disponible' : 'Stream bloqueado — configura un proxy en PROXY_URL');
+      }
+    }
+
+    if(Hls.isSupported()){
+      _oleadaHls = new Hls({ enableWorker:true, lowLatencyMode:true });
+      _oleadaHls.loadSource(streamUrl);
+      _oleadaHls.attachMedia(video);
+      _oleadaHls.on(Hls.Events.MANIFEST_PARSED, onReady);
+      _oleadaHls.on(Hls.Events.ERROR, function(e,d){ if(d.fatal) onFail(); });
+    } else if(video.canPlayType('application/vnd.apple.mpegurl')){
+      video.src = streamUrl;
+      video.addEventListener('loadedmetadata', onReady, {once:true});
+      video.addEventListener('error', onFail, {once:true});
+    } else {
+      video.src = streamUrl;
+      video.addEventListener('canplay', onReady, {once:true});
+      video.addEventListener('error', onFail, {once:true});
+    }
   }
+  tryStream(_streamUrls[0]);
 }
 
 function oleadaFullscreen(){
