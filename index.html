@@ -2057,8 +2057,13 @@ function initCatalog(genre) {
   currentGenre = genre || '';
   if(window.allContent && window.allContent.length > 0) allContent = window.allContent;
   filtered = allContent.slice();
-  // Oleada: renderizar si hay contenido
-  if(typeof renderOleada === 'function') setTimeout(renderOleada, 50);
+  // Oleada: renderizar siempre al entrar al catálogo
+  if(typeof renderOleada === 'function'){
+    setTimeout(function(){
+      if((window.allContent||[]).length) renderOleada();
+      else { window._oleadaNeedsRender=true; }
+    }, 100);
+  }
   if (currentGenre === 'Canal') {
     filtered = filtered.filter(function(c){ return c.type === 'Canal' || c.m3uType === 'live'; });
   } else if (currentGenre) {
@@ -2253,7 +2258,16 @@ function initFirebase() {
       allContent        = fbContent;
       filtered          = fbContent.slice();
       console.log('[StreamVibe] ✅ '+fbContent.length+' títulos listos');
-  if(typeof renderOleada === 'function' && window._currentPage==='catalog') setTimeout(renderOleada, 80);
+  if(typeof renderOleada === 'function'){
+    if(window._currentPage==='catalog') setTimeout(renderOleada, 80);
+  }
+  // También actualizar cuando el catálogo aún no ha cargado su initCatalog
+  window._oleadaNeedsRender = true;
+  // Si el catálogo ya está abierto pero aún no renderizó
+  if(window._currentPage==='catalog' && typeof renderOleada==='function'){
+    clearTimeout(window._oleadaTimer);
+    window._oleadaTimer = setTimeout(renderOleada, 100);
+  }
       var pg = window._currentPage || 'landing';
       if(pg === 'landing' && typeof renderCarousels === 'function') renderCarousels();
       else if(pg === 'catalog'){
@@ -2453,6 +2467,11 @@ function showToast(msg){
   setTimeout(function(){ t.classList.remove('show'); }, 3000);
 }
 
+
+// ── IMG HELPERS ──
+function _imgErr(el){ var e=el.getAttribute('data-fb')||'📺'; el.parentNode.innerHTML='<span style="font-size:1.5em">'+e+'</span>'; }
+function _imgErrHide(el){ el.remove(); }
+
 // ─── CATALOG ───────────────────────────
 // ── DATA ─────────────────────────────────────────
 var allContent = window.allContent || [];
@@ -2533,11 +2552,18 @@ function renderOleadaGroups(items){
   var groups = {};
   items.forEach(function(c){ var g=c.genre||c.group||'General'; groups[g]=(groups[g]||0)+1; });
   var keys = Object.keys(groups).sort();
-  var html = '<button class="ola-group-chip'+(!_oleadaGroup?' active':'')+'" onclick="setOleadaGroup('')">Todos ('+items.length+')</button>';
+  var html = '<button class="ola-group-chip'+(!_oleadaGroup?' active':'')+'" data-grp="" style="cursor:pointer;">Todos ('+items.length+')</button>';
   keys.forEach(function(g){
-    html += '<button class="ola-group-chip'+(_oleadaGroup===g?' active':'')+'" onclick="setOleadaGroup(''+g.replace(/'/g,"\'")+'')">' +g+' ('+groups[g]+')</button>';
+    var safe = g.replace(/"/g,'&quot;');
+    html += '<button class="ola-group-chip'+(_oleadaGroup===g?' active':'')+'" data-grp="'+safe+'" style="cursor:pointer;">'+g+' ('+groups[g]+')</button>';
   });
   row.innerHTML = html;
+  // Event delegation — evita onclick inline con comillas
+  row.querySelectorAll('.ola-group-chip').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      setOleadaGroup(this.getAttribute('data-grp')||'');
+    });
+  });
 }
 
 function setOleadaGroup(g){
@@ -2554,12 +2580,17 @@ function renderOleadaList(items){
     list.innerHTML = '<div style="padding:40px 16px;text-align:center;color:var(--text3);font-size:13px;">Sin resultados</div>';
     return;
   }
+  // Event delegation — click en cualquier .ola-ch
+  list.onclick = function(e){
+    var ch = e.target.closest('.ola-ch');
+    if(ch && ch.dataset.id) oleadaPlay(ch.dataset.id);
+  };
   list.innerHTML = items.slice(0,200).map(function(item, i){
     var logo = item.logo
-      ? '<img src="'+item.logo+'" onerror="this.style.display='none';this.nextSibling.style.display='flex'" style="width:100%;height:100%;object-fit:contain;border-radius:6px;"><span style="display:none;font-size:18px;width:100%;height:100%;align-items:center;justify-content:center;">'+item.emoji+'</span>'
+            ? '<img src="'+item.logo+'" style="width:100%;height:100%;object-fit:contain;border-radius:6px;" data-fb="'+item.emoji+'" onerror="_imgErr(this)">
       : '<span style="font-size:18px;">'+item.emoji+'</span>';
     var isActive = _oleadaActive && _oleadaActive.id===item.id;
-    return '<div class="ola-ch'+(isActive?' active':'')+'" onclick="oleadaPlay(''+item.id+'')" data-id="'+item.id+'">'
+    return '<div class="ola-ch'+(isActive?' active':'')+'" data-id="'+item.id+'" style="cursor:pointer;">'
       +'<span class="ola-ch-num">'+(i+1)+'</span>'
       +'<div class="ola-ch-logo">'+logo+'</div>'
       +'<div class="ola-ch-info">'
@@ -2716,7 +2747,7 @@ function makeRow(title, items, kind){
 // Card TV en Vivo (cuadrada con logo)
 function makeLCard(item){
   var thumb = item.logo
-    ? '<img src="'+item.logo+'" onerror="this.style.display='none';this.nextSibling.style.display='flex'" style="width:65%;height:65%;object-fit:contain;position:relative;z-index:1;"><span class="lcard-emoji" style="display:none;font-size:38px;position:relative;z-index:1;">'+item.emoji+'</span>'
+        ? '<img src="'+item.logo+'" style="width:65%;height:65%;object-fit:contain;position:relative;z-index:1;" data-fb="'+item.emoji+'" onerror="_imgErr(this)">
     : '<span class="lcard-emoji" style="font-size:38px;position:relative;z-index:1;">'+item.emoji+'</span>';
   return '<div class="lcard" onclick="openPlayer(''+item.id+'')">'
     +'<div class="lcard-thumb" style="background:linear-gradient(135deg,'+item.bg1+','+item.bg2+');">'
@@ -2731,7 +2762,7 @@ function makeLCard(item){
 // Card Película/Serie (vertical)
 function makeMCard(item){
   var thumb = item.logo
-    ? '<img src="'+item.logo+'" onerror="this.style.display='none'" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">'
+    ? '<img src="'+item.logo+'" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;" onerror="this.remove()">'
     : '<span style="font-size:44px;position:relative;z-index:1;">'+item.emoji+'</span>';
   return '<div class="mcard" onclick="openPlayer(''+item.id+'')">'
     +'<div class="mcard-thumb" style="background:linear-gradient(135deg,'+item.bg1+','+item.bg2+');">'
@@ -2764,7 +2795,7 @@ function renderFlatView(){
     grid.innerHTML = filtered.slice(start,start+PAGE_SIZE).map(function(item){
       return '<div style="display:flex;gap:14px;align-items:center;padding:12px 14px;background:var(--s1);border-radius:10px;cursor:pointer;margin-bottom:8px;transition:.2s;" onclick="openPlayer(''+item.id+'')" onmouseover="this.style.background='var(--s2)'" onmouseout="this.style.background='var(--s1)'">'
         +'<div style="width:56px;height:56px;border-radius:10px;background:linear-gradient(135deg,'+item.bg1+','+item.bg2+');display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden;">'
-          +(item.logo?'<img src="'+item.logo+'" style="width:80%;height:80%;object-fit:contain;" onerror="this.style.display='none'">':'<span style="font-size:26px;">'+item.emoji+'</span>')
+                +(item.logo?'<img src="'+item.logo+'" style="width:80%;height:80%;object-fit:contain;" onerror="_imgErrHide(this)">':'<span style="font-size:26px;">'+item.emoji+'</span>')
         +'</div>'
         +'<div style="flex:1;min-width:0;">'
           +'<div style="font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--font-display);">'+item.title+'</div>'
@@ -2809,7 +2840,7 @@ function makeCard(item){
     +'</div>';
   }
   var thumbContent = item.logo
-    ? '<img src="'+item.logo+'" style="position:relative;z-index:1;width:64px;height:64px;border-radius:10px;object-fit:cover;" onerror="this.style.display=\'none\';this.nextSibling.style.display=\'block\'" /><div style="position:relative;z-index:1;font-size:44px;display:none;">'+item.emoji+'</div>'
+    ? '<img src="'+item.logo+'" sty    ? '<img src="'+item.logo+'" style="position:relative;z-index:1;width:64px;height:64px;border-radius:10px;object-fit:cover;" data-fb="'+item.emoji+'" onerror="_imgErr(this)">
     : '<div style="position:relative;z-index:1;font-size:44px;">'+item.emoji+'</div>';
   return '<div class="ccard" onclick="openPlayer(\''+item.id+'\')">'
     +'<div class="ccard-thumb">'
@@ -4142,4 +4173,3 @@ if(document.readyState==='loading'){
 
 </script>
 </body></html>
-
