@@ -2725,6 +2725,7 @@ function oleadaPlay(id){
   if(!item.stream){ posterStatus.textContent = '⚠️ Sin stream disponible'; return; }
 
   // Reproducir
+  var url = item.stream; // ← declarar url antes de usarla
   var video = document.getElementById('ola-video');
   if(_oleadaHls){ _oleadaHls.destroy(); _oleadaHls=null; }
   video.pause(); video.src='';
