@@ -968,6 +968,7 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
 /* ═══ SPA NAVIGATION ═══ */
 .page{display:none;}
 .page.active{display:block;}
+#page-catalog.active{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
 #page-landing .hero{min-height:100vh;}
 .spa-nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:14px 32px;display:flex;align-items:center;gap:20px;background:rgba(10,10,15,0.95);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.08);}
 .spa-logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;background:linear-gradient(135deg,#7B2FFF,#FF6B35);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;flex-shrink:0;}
@@ -1299,7 +1300,7 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
 </div>
 
 <!-- ═══ PAGE: CATALOG ═══ -->
-<div class="page" id="page-catalog">
+<div class="page" id="page-catalog" style="flex-direction:column;">
 <div id="oleada-app">
 
   <!-- SIDEBAR IZQUIERDO -->
@@ -2059,10 +2060,13 @@ function initCatalog(genre) {
   filtered = allContent.slice();
   // Oleada: renderizar siempre al entrar al catálogo
   if(typeof renderOleada === 'function'){
-    setTimeout(function(){
-      if((window.allContent||[]).length) renderOleada();
-      else { window._oleadaNeedsRender=true; }
-    }, 100);
+    // Intentar renderizar ahora y cada 500ms hasta que haya datos
+    function _tryRender(attempts){
+      var data = window.allContent || allContent || [];
+      if(data.length){ renderOleada(); return; }
+      if(attempts > 0) setTimeout(function(){ _tryRender(attempts-1); }, 500);
+    }
+    _tryRender(10); // hasta 5 segundos de espera
   }
   if (currentGenre === 'Canal') {
     filtered = filtered.filter(function(c){ return c.type === 'Canal' || c.m3uType === 'live'; });
@@ -2258,15 +2262,14 @@ function initFirebase() {
       allContent        = fbContent;
       filtered          = fbContent.slice();
       console.log('[StreamVibe] ✅ '+fbContent.length+' títulos listos');
+  // Siempre renderizar Oleada cuando los datos llegan
   if(typeof renderOleada === 'function'){
-    if(window._currentPage==='catalog') setTimeout(renderOleada, 80);
-  }
-  // También actualizar cuando el catálogo aún no ha cargado su initCatalog
-  window._oleadaNeedsRender = true;
-  // Si el catálogo ya está abierto pero aún no renderizó
-  if(window._currentPage==='catalog' && typeof renderOleada==='function'){
     clearTimeout(window._oleadaTimer);
-    window._oleadaTimer = setTimeout(renderOleada, 100);
+    window._oleadaTimer = setTimeout(function(){
+      renderOleada();
+      // Re-intentar por si el DOM aún no está listo
+      setTimeout(function(){ if(!document.querySelector('.ola-ch')) renderOleada(); }, 500);
+    }, 100);
   }
       var pg = window._currentPage || 'landing';
       if(pg === 'landing' && typeof renderCarousels === 'function') renderCarousels();
@@ -2469,7 +2472,7 @@ function showToast(msg){
 
 
 // ── IMG HELPERS ──
-function _imgErr(el){ var e=el.getAttribute('data-fb')||'📺'; el.parentNode.innerHTML='<span style="font-size:1.5em">'+e+'</span>'; }
+function _imgErr(el){ el.style.display='none'; var s=el.parentNode.querySelector('[data-fb]'); if(s)s.style.display='inline'; }
 function _imgErrHide(el){ el.remove(); }
 
 // ─── CATALOG ───────────────────────────
@@ -2587,7 +2590,7 @@ function renderOleadaList(items){
   };
   list.innerHTML = items.slice(0,200).map(function(item, i){
     var logo = item.logo
-            ? '<img src="'+item.logo+'" style="width:100%;height:100%;object-fit:contain;border-radius:6px;" data-fb="'+item.emoji+'" onerror="_imgErr(this)">
+      ? '<img src="'+item.logo+'" style="width:100%;height:100%;object-fit:contain;border-radius:6px;" onerror="_imgErr(this)"><span data-fb="1" style="display:none;font-size:20px;">'+item.emoji+'</span>'
       : '<span style="font-size:18px;">'+item.emoji+'</span>';
     var isActive = _oleadaActive && _oleadaActive.id===item.id;
     return '<div class="ola-ch'+(isActive?' active':'')+'" data-id="'+item.id+'" style="cursor:pointer;">'
@@ -2747,7 +2750,7 @@ function makeRow(title, items, kind){
 // Card TV en Vivo (cuadrada con logo)
 function makeLCard(item){
   var thumb = item.logo
-        ? '<img src="'+item.logo+'" style="width:65%;height:65%;object-fit:contain;position:relative;z-index:1;" data-fb="'+item.emoji+'" onerror="_imgErr(this)">
+    ? '<img src="'+item.logo+'" style="width:65%;height:65%;object-fit:contain;position:relative;z-index:1;" onerror="_imgErr(this)"><span data-fb="1" style="display:none;font-size:36px;">'+item.emoji+'</span>'
     : '<span class="lcard-emoji" style="font-size:38px;position:relative;z-index:1;">'+item.emoji+'</span>';
   return '<div class="lcard" onclick="openPlayer(''+item.id+'')">'
     +'<div class="lcard-thumb" style="background:linear-gradient(135deg,'+item.bg1+','+item.bg2+');">'
@@ -2840,7 +2843,7 @@ function makeCard(item){
     +'</div>';
   }
   var thumbContent = item.logo
-    ? '<img src="'+item.logo+'" sty    ? '<img src="'+item.logo+'" style="position:relative;z-index:1;width:64px;height:64px;border-radius:10px;object-fit:cover;" data-fb="'+item.emoji+'" onerror="_imgErr(this)">
+    ? '<img src="'+item.logo+'" style="position:relative;z-index:1;width:64px;height:64px;border-radius:10px;object-fit:cover;" onerror="_imgErr(this)"><span data-fb="1" style="display:none;font-size:40px;">'+item.emoji+'</span>'
     : '<div style="position:relative;z-index:1;font-size:44px;">'+item.emoji+'</div>';
   return '<div class="ccard" onclick="openPlayer(\''+item.id+'\')">'
     +'<div class="ccard-thumb">'
