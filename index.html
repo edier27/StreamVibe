@@ -2761,7 +2761,23 @@ function oleadaPlay(id){
     }
 
     if(Hls.isSupported()){
-      _oleadaHls = new Hls({ enableWorker:true, lowLatencyMode:true });
+      _oleadaHls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: true,
+        // Interceptar TODAS las peticiones (segmentos incluidos) para pasarlas por el proxy
+        xhrSetup: function(xhr, xhrUrl) {
+          if(PROXY_URL && xhrUrl && !xhrUrl.startsWith(PROXY_URL)) {
+            var proxied = PROXY_URL + '/proxy?url=' + encodeURIComponent(xhrUrl);
+            xhr.open('GET', proxied, true);
+          }
+        },
+        fetchSetup: function(context, initParams) {
+          if(PROXY_URL && context.url && !context.url.startsWith(PROXY_URL)) {
+            context.url = PROXY_URL + '/proxy?url=' + encodeURIComponent(context.url);
+          }
+          return new Request(context.url, initParams);
+        }
+      });
       _oleadaHls.loadSource(streamUrl);
       _oleadaHls.attachMedia(video);
       _oleadaHls.on(Hls.Events.MANIFEST_PARSED, onReady);
