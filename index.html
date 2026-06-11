@@ -251,7 +251,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 32px;display:fl
 .layout{display:flex;padding-top:62px;min-height:100vh;}
 .sidebar{width:220px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);padding:20px 0;position:fixed;top:62px;bottom:0;overflow-y:auto;}
 /* ── OLEADA STYLE ── */
-#oleada-app{display:flex;height:calc(100vh - 62px);margin-top:62px;background:#0A0A0F;overflow:hidden;}
+#oleada-app{display:flex;height:calc(100vh - 62px);margin-top:62px;background:#0A0A0F;overflow:hidden;position:relative;z-index:1;}
 
 /* Sidebar */
 #oleada-sidebar{width:160px;flex-shrink:0;background:#111118;border-right:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;padding:16px 0;overflow-y:auto;}
@@ -269,9 +269,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 32px;display:fl
 .ola-nav-bottom{padding:8px;border-top:1px solid rgba(255,255,255,0.06);margin-top:auto;}
 
 /* Centro */
-#oleada-center{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
-#ola-video-wrap{position:relative;background:#000;flex-shrink:0;aspect-ratio:16/9;max-height:60vh;}
-#ola-video{width:100%;height:100%;object-fit:contain;display:block;background:#000;}
+#oleada-center{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;background:#000;}
+#ola-video-wrap{position:relative;background:#000;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;}
+#ola-video{width:100%;height:100%;object-fit:contain;display:block;background:#000;max-height:calc(100vh - 160px);}
 #ola-poster{position:absolute;inset:0;background:linear-gradient(135deg,#0a0a1a,#1a0545);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:3;}
 #ola-poster-logo-wrap{width:80px;height:80px;border-radius:16px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;overflow:hidden;}
 #ola-poster-logo{width:80%;height:80%;object-fit:contain;}
@@ -282,8 +282,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 32px;display:fl
 #ola-now-playing{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;}
 #ola-live-dot{background:#EF4444;color:#fff;font-size:9px;font-weight:700;padding:3px 7px;border-radius:4px;font-family:var(--font-mono);}
 #ola-fs-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:14px;}
-#ola-video-info{padding:12px 16px 6px;flex-shrink:0;}
-#ola-groups-row{display:flex;gap:8px;padding:8px 16px;overflow-x:auto;flex-shrink:0;}
+#ola-video-info{padding:8px 16px 4px;flex-shrink:0;}
+#ola-groups-row{display:flex;gap:8px;padding:6px 16px;overflow-x:auto;flex-shrink:0;max-height:44px;}
 #ola-groups-row::-webkit-scrollbar{display:none;}
 .ola-group-chip{padding:5px 14px;border-radius:16px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:.15s;}
 .ola-group-chip:hover,.ola-group-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;}
@@ -968,7 +968,7 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
 /* ═══ SPA NAVIGATION ═══ */
 .page{display:none;}
 .page.active{display:block;}
-#page-catalog.active{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+#page-catalog.active{display:block;height:100vh;overflow:hidden;padding-top:0;}
 #page-landing .hero{min-height:100vh;}
 .spa-nav{position:fixed;top:0;left:0;right:0;z-index:200;padding:14px 32px;display:flex;align-items:center;gap:20px;background:rgba(10,10,15,0.95);backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,0.08);}
 .spa-logo{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;background:linear-gradient(135deg,#7B2FFF,#FF6B35);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;flex-shrink:0;}
@@ -2055,13 +2055,21 @@ function initLanding() {
 }
 
 
-// ── GLOBAL CLICK DELEGATION para tarjetas (evita onclick inline con comillas) ──
+// ── GLOBAL CLICK DELEGATION para tarjetas y canales ──
 document.addEventListener('click', function(e){
+  // Tarjetas con data-pid
   var card = e.target.closest('[data-pid]');
   if(card){
     var pid = card.getAttribute('data-pid');
-    if(typeof oleadaPlay === 'function') oleadaPlay(pid);
+    if(typeof oleadaPlay === 'function' && document.getElementById('oleada-app')) oleadaPlay(pid);
     else if(typeof openPlayer === 'function') openPlayer(pid);
+    return;
+  }
+  // Canales Oleada con data-id
+  var ch = e.target.closest('.ola-ch[data-id]');
+  if(ch){
+    if(typeof oleadaPlay === 'function') oleadaPlay(ch.getAttribute('data-id'));
+    return;
   }
 });
 
@@ -2567,13 +2575,13 @@ var _oleadaHls      = null;
 var _oleadaActive   = null;
 
 var OLEADA_CATS = {
-  vivo:      function(c){ return c.type==='Canal'||c.m3uType==='live'; },
-  populares: function(c){ return c.rating>=8; },
-  series:    function(c){ return c.type==='Serie'||c.m3uType==='series'; },
-  pelicula:  function(c){ return c.type==='Película'||c.m3uType==='movie'; },
-  ninos:     function(c){ return /infantil|ni.o|kids|cartoon/i.test(c.genre+c.group); },
-  anime:     function(c){ return /anime|animaci/i.test(c.genre+c.group); },
-  deporte:   function(c){ return /deport|sport|futbol|foot|basket|tenis/i.test(c.genre+c.group); },
+  vivo:      function(c){ return c.m3uType==='live'||c.type==='Canal'; },
+  populares: function(c){ return c.m3uType==='live'||c.m3uType==='movie'||c.m3uType==='series'; },
+  series:    function(c){ return c.m3uType==='series'||c.type==='Serie'; },
+  pelicula:  function(c){ return c.m3uType==='movie'||c.type==='Película'; },
+  ninos:     function(c){ return /infantil|ni[ñn]o|kids|cartoon|junior/i.test((c.genre||'')+(c.group||'')+(c.title||'')); },
+  anime:     function(c){ return /anime|animaci[oó]/i.test((c.genre||'')+(c.group||'')+(c.title||'')); },
+  deporte:   function(c){ return /deport|sport|f[uú]tbol|foot|basket|tenis|liga|championship|cricket|rugby/i.test((c.genre||'')+(c.group||'')); },
   noticias:  function(c){ return /noticias|news|informativ/i.test(c.genre+c.group); },
   musica:    function(c){ return /m.sica|music/i.test(c.genre+c.group); },
   todos:     function(c){ return true; }
@@ -3158,9 +3166,8 @@ function showToast(msg){
 }
 
 // Close player on overlay click
-document.getElementById('player-modal').addEventListener('click',function(e){
-  if(e.target===this) closePlayer();
-});
+var _pm = document.getElementById('player-modal');
+if(_pm) _pm.addEventListener('click',function(e){ if(e.target===this) closePlayer(); });
 
 // Init
 if(typeof allContent !== 'undefined') renderGrid();
