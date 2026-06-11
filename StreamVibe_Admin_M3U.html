@@ -194,7 +194,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-hei
       <div class="ph">
         <div class="pt">📡 Lista <span>M3U</span></div>
         <div style="display:flex;gap:10px;">
-          <button class="btn btn-s btn-sm" onclick="loadFromFirebase()" title="Recargar datos guardados en Firebase">🔄 Recargar</button>
           <button class="btn btn-s btn-sm" onclick="clearAll()">🗑️ Limpiar todo</button>
           <button class="btn btn-p" id="btn-sync" onclick="syncToFirebase()" disabled>☁️ Publicar en StreamVibe</button>
         </div>
@@ -429,74 +428,10 @@ function initFB(){
   try{
     var app = firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
     db = app.firestore();
-    log('✅ Firebase conectado — cargando contenido guardado...');
-    loadFromFirebase();
+    log('✅ Firebase conectado — listo para publicar');
   }catch(e){
     log('⚠️ Firebase no disponible: '+e.message);
   }
-}
-
-// ── CARGAR DATOS GUARDADOS DESDE FIREBASE ─────────
-function loadFromFirebase(){
-  if(!db){ log('⚠️ Firebase no listo'); return; }
-  log('📥 Restaurando lista desde Firebase...');
-  db.collection('sv_content').limit(500).get().then(function(snap){
-    if(snap.empty){
-      log('ℹ️ No hay contenido guardado en Firebase todavía.');
-      return;
-    }
-    var typeMap = {'Película':'movie','Serie':'series','Canal':'live','Documental':'other'};
-    _items = snap.docs.map(function(d){
-      var data = d.data();
-      var m3uType = data.m3uType || typeMap[data.type] || 'other';
-      return {
-        title:   data.title||'',
-        group:   data.group||data.genre||'',
-        logo:    data.logo||'',
-        tvgId:   data.tvgId||'',
-        duration: -1,
-        type:    m3uType,
-        url:     data.stream||'',
-        access:  data.access||'GRATIS',
-        fbId:    d.id,
-        _fromFB: true
-      };
-    });
-    _movies = _items.filter(function(i){ return i.type==='movie'; });
-    _series = _items.filter(function(i){ return i.type==='series'; });
-    _live   = _items.filter(function(i){ return i.type==='live'; });
-    _docs   = _items.filter(function(i){ return i.type==='other'; });
-
-    updateCounters();
-    renderPreview();
-    renderAllTables();
-    document.getElementById('btn-sync').disabled = false;
-
-    // Guardar también en localStorage como caché de respaldo
-    try{ localStorage.setItem('sv_items_cache', JSON.stringify(_items.slice(0, 200))); }catch(e){}
-
-    log('✅ '+_items.length+' elementos restaurados desde Firebase ('+_movies.length+' películas, '+_series.length+' series, '+_live.length+' canales)');
-    showToast('📥 '+_items.length+' elementos restaurados desde Firebase');
-  }).catch(function(e){
-    log('⚠️ Error al cargar desde Firebase: '+e.message);
-    // Intentar con caché localStorage
-    try{
-      var cached = localStorage.getItem('sv_items_cache');
-      if(cached){
-        _items = JSON.parse(cached);
-        _movies = _items.filter(function(i){ return i.type==='movie'; });
-        _series = _items.filter(function(i){ return i.type==='series'; });
-        _live   = _items.filter(function(i){ return i.type==='live'; });
-        _docs   = _items.filter(function(i){ return i.type==='other'; });
-        updateCounters();
-        renderPreview();
-        renderAllTables();
-        document.getElementById('btn-sync').disabled = false;
-        log('💾 '+_items.length+' elementos restaurados desde caché local');
-        showToast('💾 Datos restaurados desde caché local');
-      }
-    }catch(ce){ log('❌ Sin caché local disponible'); }
-  });
 }
 
 // ── M3U PARSER ────────────────────────────────────
@@ -809,122 +744,110 @@ function testStream(url){
 // ── SYNC TO FIREBASE ──────────────────────────────
 function syncToFirebase(){
   if(!_items.length){ showToast('⚠️ Primero carga una lista M3U'); return; }
-  if(!db){ showToast('⚠️ Firebase no conectado — verifica la config'); return; }
+  exportCatalog();
+}
 
+function exportCatalog(){
   var btn = document.getElementById('sync-btn');
   var btnMain = document.getElementById('btn-sync');
   btn.disabled = true;
   if(btnMain) btnMain.disabled = true;
-  btn.textContent = '⏳ Publicando...';
+  btn.textContent = '⏳ Generando JSON...';
+  showProgress('Generando catalog.json...');
+  setProgress(10);
 
-  showProgress('Publicando en Firebase...');
-  setProgress(5);
+  setTimeout(function(){
+    var emoji = {movie:'🎬',series:'📺',live:'🔴',other:'🎥'};
+    var typeMap = {movie:'Película',series:'Serie',live:'Canal',other:'Documental'};
 
-  var batch;
-  var BATCH_SIZE = 400;
-  var total = _items.length;
-  var done = 0;
-  var errors = 0;
-
-  // Clear existing and upload in batches
-  var replace = document.getElementById('opt-replace') && document.getElementById('opt-replace').checked;
-
-  function uploadBatch(startIdx){
-    batch = db.batch();
-    var end = Math.min(startIdx + BATCH_SIZE, total);
-
-    for(var i=startIdx; i<end; i++){
-      var item = _items[i];
-      var docRef = db.collection('sv_content').doc();
-      var emoji = {movie:'🎬',series:'📺',live:'🔴',other:'🎥'}[item.type]||'🎬';
-      var genre = item.group || {movie:'Película',series:'Serie',live:'TV en vivo',other:'Documental'}[item.type] || 'General';
-
-      batch.set(docRef,{
+    var catalog = _items.map(function(item){
+      return {
+        id:       item.tvgId || item.title.replace(/[^a-zA-Z0-9]/g,'_').substring(0,30)+'_'+Math.random().toString(36).substr(2,5),
         title:    item.title,
-        type:     {movie:'Película',series:'Serie',live:'Canal',other:'Documental'}[item.type]||'Película',
-        genre:    genre,
+        type:     typeMap[item.type]||'Película',
+        m3uType:  item.type,
+        genre:    item.group || typeMap[item.type] || 'General',
         group:    item.group||'',
-        year:     new Date().getFullYear(),
+        year:     2026,
         rating:   8.0,
         access:   item.access||'GRATIS',
-        emoji:    item.logo ? '' : emoji,
+        emoji:    emoji[item.type]||'🎬',
         logo:     item.logo||'',
-        stream:   item.url,
-        tvgId:    item.tvgId||'',
-        duration: item.duration>0 ? Math.floor(item.duration/60)+'m' : '',
+        stream:   item.url||'',
         bg1:      '#0d0221',
         bg2:      '#1a0545',
-        desc:     item.title+' — '+genre,
-        active:   true,
-        m3uType:  item.type,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      });
-    }
+        active:   true
+      };
+    });
 
-    batch.commit()
-      .then(function(){
-        done = end;
-        var pct = Math.round(done/total*100);
-        setProgress(pct);
-        log('✅ '+done+'/'+total+' elementos publicados...');
+    setProgress(60);
+    log('📦 '+catalog.length+' elementos en catalog.json');
 
-        if(done < total){
-          setTimeout(function(){ uploadBatch(done); }, 300);
-        } else {
-          // Done!
-          setProgress(100);
-          btn.disabled = false;
-          if(btnMain) btnMain.disabled = false;
-          btn.textContent = '☁️ Publicar todo en StreamVibe';
-          setTimeout(hideProgress, 1000);
+    var json = JSON.stringify(catalog);
+    var blob = new Blob([json], {type:'application/json'});
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'catalog.json';
+    a.click();
+    URL.revokeObjectURL(url);
 
-          // Save sync history
-          var now = new Date();
-          var hist = document.getElementById('sync-history');
-          hist.innerHTML = '<div style="padding:14px 20px;font-size:13px;color:var(--text2);">✅ <strong>'+now.toLocaleString('es-CO')+'</strong> — '+total+' elementos publicados ('+_movies.length+' películas, '+_series.length+' series, '+_live.length+' canales)</div>' + hist.innerHTML;
+    setProgress(100);
+    setTimeout(hideProgress, 800);
+    btn.disabled = false;
+    if(btnMain) btnMain.disabled = false;
+    btn.textContent = '☁️ Publicar todo en StreamVibe';
 
-          showToast('🎉 ¡'+total+' elementos publicados en StreamVibe!');
-          log('🎉 Sincronización completada — '+total+' elementos en Firebase');
-          // Actualizar caché local
-          try{ localStorage.setItem('sv_items_cache', JSON.stringify(_items.slice(0,200))); }catch(e){}
-        }
-      })
-      .catch(function(e){
-        errors++;
-        log('❌ Error en lote: '+e.message);
-        btn.disabled = false;
-        if(btnMain) btnMain.disabled = false;
-        btn.textContent = '☁️ Publicar todo en StreamVibe';
-        showToast('❌ Error al publicar: '+e.message);
-      });
-  }
+    // Guardar en historial
+    var now = new Date();
+    var hist = document.getElementById('sync-history');
+    if(hist) hist.innerHTML = '<div style="padding:14px 20px;font-size:13px;color:var(--text2);">✅ <strong>'+now.toLocaleString('es-CO')+'</strong> — catalog.json descargado con '+catalog.length+' elementos</div>' + hist.innerHTML;
 
-  // If replace, clear collection first
-  if(replace){
-    log('🗑️ Limpiando contenido anterior...');
-    db.collection('sv_content').limit(500).get().then(function(snap){
-      if(snap.empty){ uploadBatch(0); return; }
-      var delBatch = db.batch();
-      snap.docs.forEach(function(d){ delBatch.delete(d.ref); });
-      return delBatch.commit();
-    }).then(function(){ uploadBatch(0); });
-  } else {
-    uploadBatch(0);
-  }
+    showToast('✅ catalog.json descargado — súbelo a tu repo de GitHub');
+    log('✅ catalog.json listo: '+catalog.length+' elementos. Súbelo a edier27.github.io/StreamVibe/catalog.json');
+
+    // Mostrar instrucciones
+    showInstructions(catalog.length);
+  }, 200);
+
+
 }
+
+
+// Mostrar instrucciones después de descargar
+function showInstructions(count){
+  var existing = document.getElementById('export-instructions');
+  if(existing) existing.remove();
+  var div = document.createElement('div');
+  div.id = 'export-instructions';
+  div.style.cssText = 'margin:20px;padding:20px;background:#1a1a2e;border:1px solid rgba(123,47,255,0.4);border-radius:12px;font-size:13px;line-height:1.7;';
+  div.innerHTML = '<div style="font-family:Syne,sans-serif;font-size:15px;font-weight:700;margin-bottom:12px;color:#9B5FFF;">📋 Pasos para publicar catalog.json</div>'
+    +'<ol style="padding-left:20px;color:#A0A0B0;">'
+    +'<li>Ve a <strong>github.com/edier27/StreamVibe</strong></li>'
+    +'<li>Haz clic en <strong>Add file → Upload files</strong></li>'
+    +'<li>Sube el archivo <code>catalog.json</code> descargado</li>'
+    +'<li>Haz commit: <em>"Update catalog"</em></li>'
+    +'<li>Espera ~1 min y recarga StreamVibe</li>'
+    +'</ol>'
+    +'<div style="margin-top:12px;padding:10px;background:rgba(16,185,129,0.1);border-radius:8px;color:#10B981;">'
+    +'✅ StreamVibe cargará <strong>'+count.toLocaleString()+' elementos</strong> desde:<br>'
+    +'<code style="font-size:11px;">https://edier27.github.io/StreamVibe/catalog.json</code>'
+    +'</div>';
+  var hist = document.getElementById('sync-history');
+  if(hist) hist.parentNode.insertBefore(div, hist);
+}
+
 
 function clearAll(){
   if(!_items.length){ showToast('No hay contenido cargado'); return; }
-  if(!confirm('¿Limpiar toda la lista cargada?\n\nEsto solo limpia la vista local, no borra lo publicado en Firebase.')) return;
+  if(!confirm('¿Limpiar toda la lista cargada?')) return;
   _items=[]; _movies=[]; _series=[]; _live=[]; _docs=[];
   document.getElementById('preview-card').style.display='none';
   document.getElementById('stats-row').style.display='none';
   document.getElementById('btn-sync').disabled=true;
   updateCounters();
   renderAllTables();
-  try{ localStorage.removeItem('sv_items_cache'); }catch(e){}
-  showToast('🗑️ Lista limpiada localmente');
+  showToast('🗑️ Lista limpiada');
 }
 
 // ── SETTINGS ──────────────────────────────────────
