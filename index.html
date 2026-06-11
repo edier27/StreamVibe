@@ -2182,7 +2182,12 @@ var PROXY_URL = window.STREAMVIBE_PROXY || 'https://streamvibe-proxy-production.
 
 function _proxyStream(url) {
   if (!PROXY_URL || !url) return url;
-  if (url.includes('.m3u8') || url.includes('m3u')) {
+  // Usar /m3u8 para streams HLS (reescribe segmentos internos)
+  // Usar /proxy para archivos directos (mp4, mkv, ts)
+  var isHls = url.includes('.m3u8') || url.includes('m3u') || 
+              url.includes('/live/') || url.includes('type=m3u') ||
+              url.includes(':8443/') || url.includes(':8080/');
+  if (isHls) {
     return PROXY_URL + '/m3u8?url=' + encodeURIComponent(url);
   }
   return PROXY_URL + '/proxy?url=' + encodeURIComponent(url);
@@ -2735,9 +2740,10 @@ function oleadaPlay(id){
 
   // Proxies CORS públicos para evitar bloqueos
   var _attempts = 0;
-  // Estrategia: directo → proxy propio → proxies públicos
-  var _streamUrls = [url];
-  if(PROXY_URL) _streamUrls.push(_proxyStream(url));
+  // Estrategia: proxy propio primero → directo → proxy público
+  var _streamUrls = [];
+  if(PROXY_URL) _streamUrls.push(_proxyStream(url)); // proxy propio primero
+  _streamUrls.push(url); // directo como fallback
   _streamUrls.push('https://corsproxy.io/?' + encodeURIComponent(url));
 
   function tryStream(streamUrl){
