@@ -250,6 +250,61 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:14px 32px;display:fl
 /* SIDEBAR */
 .layout{display:flex;padding-top:62px;min-height:100vh;}
 .sidebar{width:220px;flex-shrink:0;background:var(--s1);border-right:1px solid var(--border);padding:20px 0;position:fixed;top:62px;bottom:0;overflow-y:auto;}
+/* ── OLEADA STYLE ── */
+#oleada-app{display:flex;height:calc(100vh - 62px);margin-top:62px;background:#0A0A0F;overflow:hidden;}
+
+/* Sidebar */
+#oleada-sidebar{width:160px;flex-shrink:0;background:#111118;border-right:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;padding:16px 0;overflow-y:auto;}
+.ola-logo{font-family:var(--font-display);font-size:15px;font-weight:800;background:linear-gradient(135deg,var(--accent),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;padding:0 16px 14px;cursor:pointer;}
+.ola-search-wrap{position:relative;padding:0 10px 14px;}
+.ola-search{width:100%;background:#1C1C26;border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:7px 12px 7px 30px;color:#fff;font-size:11px;font-family:var(--font-body);outline:none;}
+.ola-search:focus{border-color:var(--accent);}
+.ola-search-ic{position:absolute;left:18px;top:50%;transform:translateY(-60%);font-size:11px;color:var(--text3);}
+.ola-nav{display:flex;flex-direction:column;gap:2px;padding:0 8px;flex:1;}
+.ola-nav-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:10px;border:none;background:none;color:var(--text2);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font-body);text-align:left;width:100%;transition:.15s;}
+.ola-nav-item:hover{background:rgba(255,255,255,0.06);color:#fff;}
+.ola-nav-item.active{background:rgba(123,47,255,0.18);color:#fff;font-weight:600;}
+.ola-nav-item.active .ola-nav-ic{filter:none;}
+.ola-nav-ic{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.ola-nav-bottom{padding:8px;border-top:1px solid rgba(255,255,255,0.06);margin-top:auto;}
+
+/* Centro */
+#oleada-center{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+#ola-video-wrap{position:relative;background:#000;flex-shrink:0;aspect-ratio:16/9;max-height:60vh;}
+#ola-video{width:100%;height:100%;object-fit:contain;display:block;background:#000;}
+#ola-poster{position:absolute;inset:0;background:linear-gradient(135deg,#0a0a1a,#1a0545);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:3;}
+#ola-poster-logo-wrap{width:80px;height:80px;border-radius:16px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+#ola-poster-logo{width:80%;height:80%;object-fit:contain;}
+#ola-poster-emoji{font-size:40px;}
+#ola-poster-title{font-family:var(--font-display);font-size:18px;font-weight:700;color:#fff;}
+#ola-poster-status{font-size:12px;color:rgba(255,255,255,0.4);}
+#ola-video-bar{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;background:linear-gradient(to top,rgba(0,0,0,0.7),transparent);display:flex;align-items:center;justify-content:space-between;z-index:4;}
+#ola-now-playing{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;}
+#ola-live-dot{background:#EF4444;color:#fff;font-size:9px;font-weight:700;padding:3px 7px;border-radius:4px;font-family:var(--font-mono);}
+#ola-fs-btn{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2);color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;font-size:14px;}
+#ola-video-info{padding:12px 16px 6px;flex-shrink:0;}
+#ola-groups-row{display:flex;gap:8px;padding:8px 16px;overflow-x:auto;flex-shrink:0;}
+#ola-groups-row::-webkit-scrollbar{display:none;}
+.ola-group-chip{padding:5px 14px;border-radius:16px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;white-space:nowrap;flex-shrink:0;transition:.15s;}
+.ola-group-chip:hover,.ola-group-chip.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* Lista derecha */
+#oleada-list{width:300px;flex-shrink:0;background:#111118;border-left:1px solid rgba(255,255,255,0.06);display:flex;flex-direction:column;overflow:hidden;}
+.ola-list-header{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.ola-list-header span:first-child{font-family:var(--font-display);font-size:14px;font-weight:700;}
+#ola-channel-list{flex:1;overflow-y:auto;padding:6px 0;}
+.ola-ch{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;transition:.15s;border-left:3px solid transparent;}
+.ola-ch:hover{background:rgba(255,255,255,0.05);}
+.ola-ch.active{background:rgba(123,47,255,0.12);border-left-color:var(--accent);}
+.ola-ch-num{font-size:11px;color:var(--text3);font-family:var(--font-mono);width:20px;flex-shrink:0;text-align:right;}
+.ola-ch-logo{width:36px;height:36px;border-radius:8px;background:var(--s2);object-fit:contain;flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.ola-ch-logo img{width:100%;height:100%;object-fit:contain;}
+.ola-ch-logo span{font-size:18px;}
+.ola-ch-info{flex:1;min-width:0;}
+.ola-ch-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ola-ch-group{font-size:10px;color:var(--text3);margin-top:1px;}
+.ola-ch-playing{width:6px;height:6px;border-radius:50%;background:#EF4444;flex-shrink:0;animation:pulse-dot 1s infinite;}
+/* ── FIN OLEADA ── */
 /* ── MAGIS STYLE CATALOG ── */
 .cat-hero{background:linear-gradient(135deg,#0d0221 0%,#1a0545 60%,#0d0221 100%);padding:28px 32px 20px;border-bottom:1px solid var(--border);}
 .cat-hero-title{font-family:var(--font-display);font-size:26px;font-weight:800;margin-bottom:4px;}
@@ -1245,149 +1300,107 @@ nav{padding:16px 40px;display:flex;align-items:center;justify-content:space-betw
 
 <!-- ═══ PAGE: CATALOG ═══ -->
 <div class="page" id="page-catalog">
-  <div class="page-pt">
-    <div style="display:flex;min-height:calc(100vh - 62px);">
-<!-- NAV -->
+<div id="oleada-app">
 
-
-<!-- LAYOUT -->
-<div class="layout">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sb-section">
-      <div class="sb-label">Principal</div>
-      <button class="sb-item" onclick="navigate('landing')"><div class="sb-ic">🏠</div> Inicio</button>
-      <button class="sb-item active" onclick="filterGenre('')"><div class="sb-ic">🎬</div> Catálogo <div class="sb-badge">NEW</div></button>
-      <button class="sb-item" onclick="showToast('📋 Mi Lista — Próximamente')"><div class="sb-ic">📋</div> Mi Lista</button>
-      <button class="sb-item" onclick="showToast('🕐 Historial — Próximamente')"><div class="sb-ic">🕐</div> Historial</button>
+  <!-- SIDEBAR IZQUIERDO -->
+  <aside id="oleada-sidebar">
+    <div class="ola-logo" onclick="navigate('landing')">StreamVibe</div>
+    <div class="ola-search-wrap">
+      <span class="ola-search-ic">🔍</span>
+      <input id="search-input" class="ola-search" type="text" placeholder="Busca..." oninput="handleSearch()">
     </div>
-    <div class="sb-divider"></div>
-    <div class="sb-section">
-      <div class="sb-label">Categorías</div>
-      <button class="sb-item" onclick="filterGenre('Canal')"><div class="sb-ic">🔴</div> TV en Vivo</button>
-      <button class="sb-item" onclick="filterGenre('Acción')"><div class="sb-ic">💥</div> Acción</button>
-      <button class="sb-item" onclick="filterGenre('Drama')"><div class="sb-ic">🎭</div> Drama</button>
-      <button class="sb-item" onclick="filterGenre('Sci-Fi')"><div class="sb-ic">🚀</div> Ciencia Ficción</button>
-      <button class="sb-item" onclick="filterGenre('Terror')"><div class="sb-ic">👻</div> Terror</button>
-      <button class="sb-item" onclick="filterGenre('Comedia')"><div class="sb-ic">😂</div> Comedia</button>
-      <button class="sb-item" onclick="filterGenre('Documental')"><div class="sb-ic">🎥</div> Documentales</button>
-      <button class="sb-item" onclick="filterGenre('Animación')"><div class="sb-ic">✨</div> Animación</button>
-    </div>
-    <div class="sb-divider"></div>
-    <div class="sb-section">
-      <div class="sb-label">Cuenta</div>
-      <button class="sb-item" onclick="showToast('⚙️ Configuración')"><div class="sb-ic">⚙️</div> Configuración</button>
-      <button class="sb-item" onclick="showToast('🚪 Cerrando sesión...')"><div class="sb-ic">🚪</div> Salir</button>
+    <nav class="ola-nav">
+      <button class="ola-nav-item active" id="ocat-vivo" onclick="setOleadaCategory('vivo')">
+        <span class="ola-nav-ic">📡</span><span>Vivo</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-populares" onclick="setOleadaCategory('populares')">
+        <span class="ola-nav-ic">🔥</span><span>Populares</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-series" onclick="setOleadaCategory('series')">
+        <span class="ola-nav-ic">🎬</span><span>Series</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-pelicula" onclick="setOleadaCategory('pelicula')">
+        <span class="ola-nav-ic">🎥</span><span>Pelicula</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-ninos" onclick="setOleadaCategory('ninos')">
+        <span class="ola-nav-ic" style="color:#FF6B35;">🧒</span><span>Niños</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-anime" onclick="setOleadaCategory('anime')">
+        <span class="ola-nav-ic">✨</span><span>Anime</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-deporte" onclick="setOleadaCategory('deporte')">
+        <span class="ola-nav-ic">⚽</span><span>Deporte</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-noticias" onclick="setOleadaCategory('noticias')">
+        <span class="ola-nav-ic">📰</span><span>Noticias</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-musica" onclick="setOleadaCategory('musica')">
+        <span class="ola-nav-ic">🎵</span><span>Música</span>
+      </button>
+      <button class="ola-nav-item" id="ocat-todos" onclick="setOleadaCategory('todos')">
+        <span class="ola-nav-ic">▤</span><span>Todos</span>
+      </button>
+    </nav>
+    <div class="ola-nav-bottom">
+      <button class="ola-nav-item" onclick="navigate('auth','login')">
+        <span class="ola-nav-ic">👤</span><span>Perfil</span>
+      </button>
     </div>
   </aside>
 
-  <!-- MAIN -->
-  <main class="main" style="padding:0;">
-
-    <!-- HERO SEARCH BAR -->
-    <div class="cat-hero">
-      <div class="cat-hero-title">Tu <span>catálogo</span></div>
-      <div style="font-size:13px;color:var(--text2);margin-bottom:4px;" id="result-count">Cargando...</div>
-      <div class="cat-search-bar">
-        <span style="font-size:16px;">🔍</span>
-        <input type="text" id="search-input" placeholder="Buscar canales, películas, series..." oninput="handleSearch()">
-        <button onclick="document.getElementById('search-input').value='';handleSearch()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;">✕</button>
-      </div>
-      <!-- PILLS -->
-      <div class="cat-pills" id="genre-pills">
-        <button class="cat-pill active" onclick="filterGenre('')">🎬 Todo</button>
-        <button class="cat-pill" onclick="filterGenre('Canal')" style="border-color:#EF4444;color:#EF4444;">🔴 TV en Vivo</button>
-        <button class="cat-pill" onclick="filterGenre('Acción')">💥 Acción</button>
-        <button class="cat-pill" onclick="filterGenre('Drama')">🎭 Drama</button>
-        <button class="cat-pill" onclick="filterGenre('Sci-Fi')">🚀 Sci-Fi</button>
-        <button class="cat-pill" onclick="filterGenre('Terror')">👻 Terror</button>
-        <button class="cat-pill" onclick="filterGenre('Comedia')">😂 Comedia</button>
-        <button class="cat-pill" onclick="filterGenre('Documental')">🎥 Documental</button>
-        <button class="cat-pill" onclick="filterGenre('Animación')">✨ Animación</button>
-        <button class="cat-pill" onclick="filterGenre('Romance')">❤️ Romance</button>
-        <button class="cat-pill" onclick="filterGenre('Thriller')">🔪 Thriller</button>
-      </div>
-      <!-- Vista tabs + filtros -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:10px;">
-        <div class="view-tabs">
-          <button class="view-tab active" id="tab-rows" onclick="setCatalogView('rows')">▤ Por categoría</button>
-          <button class="view-tab" id="tab-grid" onclick="setCatalogView('grid')">⊞ Grid</button>
-          <button class="view-tab" id="tab-list" onclick="setCatalogView('list')">☰ Lista</button>
+  <!-- CENTRO: VIDEO + INFO -->
+  <div id="oleada-center">
+    <!-- Video principal inline -->
+    <div id="ola-video-wrap">
+      <video id="ola-video" playsinline controls></video>
+      <!-- Poster/loading -->
+      <div id="ola-poster">
+        <div id="ola-poster-logo-wrap">
+          <img id="ola-poster-logo" src="" onerror="this.style.display='none'">
+          <span id="ola-poster-emoji">📺</span>
         </div>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <select class="filter-select" onchange="applyFilters()" id="filter-year" style="font-size:12px;padding:6px 10px;">
-            <option value="">📅 Año</option><option value="2026">2026</option><option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option>
-          </select>
-          <select class="filter-select" onchange="applyFilters()" id="filter-type" style="font-size:12px;padding:6px 10px;">
-            <option value="">🎬 Tipo</option><option value="Película">Película</option><option value="Serie">Serie</option><option value="Canal">TV en Vivo</option><option value="Documental">Documental</option>
-          </select>
-          <select class="filter-select" onchange="applyFilters()" id="filter-access" style="font-size:12px;padding:6px 10px;">
-            <option value="">🔓 Acceso</option><option value="GRATIS">Gratis</option><option value="PRO">Pro</option>
-          </select>
-          <select class="filter-select" id="filter-rating" style="display:none"></select>
+        <div id="ola-poster-title">Selecciona un canal</div>
+        <div id="ola-poster-status">← Elige un canal de la lista</div>
+      </div>
+      <!-- Overlay top: nombre canal -->
+      <div id="ola-video-bar">
+        <div id="ola-now-playing">
+          <span id="ola-live-dot">● EN VIVO</span>
+          <span id="ola-channel-name">—</span>
         </div>
+        <button onclick="oleadaFullscreen()" id="ola-fs-btn">⛶</button>
       </div>
     </div>
-
-    <!-- CONTENT AREA -->
-    <div style="padding:24px 28px;">
-      <!-- Vista filas (Magis style) -->
-      <div id="view-rows"></div>
-      <!-- Vista grid/lista -->
-      <div class="content-grid" id="content-grid" style="display:none;"></div>
-      <!-- Paginación -->
-      <div class="pagination" id="pagination"></div>
-      <!-- Label de género activo -->
-      <span id="active-genre-label" style="display:none;"></span>
+    <!-- Info debajo del video: grupo/categoría activa -->
+    <div id="ola-video-info">
+      <div id="ola-info-name" style="font-family:var(--font-display);font-size:18px;font-weight:700;"></div>
+      <div id="ola-info-meta" style="font-size:12px;color:var(--text2);margin-top:4px;"></div>
     </div>
-
-  </main>
-</div>
-
-<!-- PLAYER MODAL -->
-<div class="player-overlay" id="player-modal">
-  <!-- Header del player -->
-  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 24px;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,0.08);flex-shrink:0;">
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div id="modal-logo-header" style="width:36px;height:36px;border-radius:8px;overflow:hidden;background:var(--s2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <img id="modal-logo" src="" style="width:100%;height:100%;object-fit:contain;display:none;" onerror="this.style.display='none'">
-        <span id="player-emoji" style="font-size:20px;"></span>
-      </div>
-      <div>
-        <div id="player-title" style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;">Reproduciendo...</div>
-        <div id="modal-meta" style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:1px;"></div>
-      </div>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <button onclick="toggleModalFullscreen()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:12px;font-weight:600;">⛶ Pantalla completa</button>
-      <button onclick="closePlayer()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:#fff;border-radius:8px;width:36px;height:36px;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;">✕</button>
-    </div>
+    <!-- Fila de grupos/sub-categorías -->
+    <div id="ola-groups-row"></div>
   </div>
-  <!-- Video -->
-  <div style="position:relative;flex:1;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden;">
-    <!-- Poster mientras carga -->
-    <div id="modal-poster" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;background:linear-gradient(135deg,#0d0221,#1a0545);z-index:2;">
-      <div style="width:100px;height:100px;border-radius:20px;overflow:hidden;background:var(--s2);display:flex;align-items:center;justify-content:center;">
-        <img id="modal-poster-logo" src="" style="width:80%;height:80%;object-fit:contain;display:none;" onerror="this.style.display='none'">
-        <span id="player-movie-title-emoji" style="font-size:52px;"></span>
-      </div>
-      <div id="player-movie-title" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;text-align:center;padding:0 32px;max-width:600px;"></div>
-      <div id="modal-status" style="display:flex;align-items:center;gap:8px;font-size:13px;color:rgba(255,255,255,0.5);">
-        <span style="width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse-dot 1.5s infinite;"></span>
-        Conectando stream...
-      </div>
-    </div>
-    <video id="modal-video" style="width:100%;height:100%;background:#000;display:block;object-fit:contain;" controls playsinline></video>
-  </div>
-</div>
 
-<!-- TOAST -->
-<div class="toast" id="toast">
-  <span id="toast-msg">Mensaje</span>
-</div>
+  <!-- DERECHA: lista de canales -->
+  <aside id="oleada-list">
+    <div class="ola-list-header">
+      <span id="ola-list-title">📡 Livestream</span>
+      <span id="ola-list-count" style="font-size:11px;color:var(--text3);"></span>
     </div>
-  </div>
+    <div id="ola-channel-list"></div>
+    <!-- IDs ocultos que necesita el JS del catálogo -->
+    <span id="result-count" style="display:none;"></span>
+    <span id="active-genre-label" style="display:none;"></span>
+    <div id="view-rows" style="display:none;"></div>
+    <div id="content-grid" style="display:none;"></div>
+    <div id="pagination" style="display:none;"></div>
+    <div id="genre-pills" style="display:none;"></div>
+    <select id="filter-year" style="display:none;"></select>
+    <select id="filter-type" style="display:none;"></select>
+    <select id="filter-access" style="display:none;"></select>
+    <select id="filter-rating" style="display:none;"></select>
+  </aside>
+
+</div>
 </div>
 
 <!-- ═══ PAGE: PLAYER ═══ -->
@@ -2044,6 +2057,8 @@ function initCatalog(genre) {
   currentGenre = genre || '';
   if(window.allContent && window.allContent.length > 0) allContent = window.allContent;
   filtered = allContent.slice();
+  // Oleada: renderizar si hay contenido
+  if(typeof renderOleada === 'function') setTimeout(renderOleada, 50);
   if (currentGenre === 'Canal') {
     filtered = filtered.filter(function(c){ return c.type === 'Canal' || c.m3uType === 'live'; });
   } else if (currentGenre) {
@@ -2238,6 +2253,7 @@ function initFirebase() {
       allContent        = fbContent;
       filtered          = fbContent.slice();
       console.log('[StreamVibe] ✅ '+fbContent.length+' títulos listos');
+  if(typeof renderOleada === 'function' && window._currentPage==='catalog') setTimeout(renderOleada, 80);
       var pg = window._currentPage || 'landing';
       if(pg === 'landing' && typeof renderCarousels === 'function') renderCarousels();
       else if(pg === 'catalog'){
@@ -2452,6 +2468,175 @@ var myList = [];
 var isPlaying = true;
 var progressInterval;
 var currentProgress = 35;
+
+
+// ══════════════════════════════════════════════════
+// ── OLEADA ENGINE ─────────────────────────────────
+// ══════════════════════════════════════════════════
+var _oleadaCategory = 'vivo';
+var _oleadaGroup    = '';
+var _oleadaHls      = null;
+var _oleadaActive   = null;
+
+var OLEADA_CATS = {
+  vivo:      function(c){ return c.type==='Canal'||c.m3uType==='live'; },
+  populares: function(c){ return c.rating>=8; },
+  series:    function(c){ return c.type==='Serie'||c.m3uType==='series'; },
+  pelicula:  function(c){ return c.type==='Película'||c.m3uType==='movie'; },
+  ninos:     function(c){ return /infantil|ni.o|kids|cartoon/i.test(c.genre+c.group); },
+  anime:     function(c){ return /anime|animaci/i.test(c.genre+c.group); },
+  deporte:   function(c){ return /deport|sport|futbol|foot|basket|tenis/i.test(c.genre+c.group); },
+  noticias:  function(c){ return /noticias|news|informativ/i.test(c.genre+c.group); },
+  musica:    function(c){ return /m.sica|music/i.test(c.genre+c.group); },
+  todos:     function(c){ return true; }
+};
+
+function setOleadaCategory(cat){
+  _oleadaCategory = cat;
+  _oleadaGroup = '';
+  // Actualizar nav activo
+  document.querySelectorAll('.ola-nav-item').forEach(function(b){ b.classList.remove('active'); });
+  var btn = document.getElementById('ocat-'+cat);
+  if(btn) btn.classList.add('active');
+  renderOleada();
+}
+
+function renderOleada(){
+  var items = (window.allContent||allContent||[]);
+  var fn = OLEADA_CATS[_oleadaCategory] || OLEADA_CATS.todos;
+  var filtered = items.filter(fn);
+
+  // Filtrar por búsqueda
+  var q = (document.getElementById('search-input')||{}).value||'';
+  if(q.trim()) filtered = filtered.filter(function(c){ return (c.title+c.genre+c.group).toLowerCase().includes(q.toLowerCase()); });
+
+  // Si hay grupo activo, filtrar
+  if(_oleadaGroup) filtered = filtered.filter(function(c){ return (c.genre||c.group||'')=== _oleadaGroup; });
+
+  // Renderizar grupos (chips)
+  renderOleadaGroups(items.filter(fn));
+
+  // Renderizar lista derecha
+  renderOleadaList(filtered);
+
+  // Actualizar header
+  var titles = {vivo:'📡 Livestream',populares:'🔥 Populares',series:'🎬 Series',pelicula:'🎥 Películas',ninos:'🧒 Niños',anime:'✨ Anime',deporte:'⚽ Deporte',noticias:'📰 Noticias',musica:'🎵 Música',todos:'▤ Todo'};
+  var el = document.getElementById('ola-list-title');
+  if(el) el.textContent = titles[_oleadaCategory]||'Catálogo';
+  var cnt = document.getElementById('ola-list-count');
+  if(cnt) cnt.textContent = filtered.length + ' canales';
+}
+
+function renderOleadaGroups(items){
+  var row = document.getElementById('ola-groups-row');
+  if(!row) return;
+  var groups = {};
+  items.forEach(function(c){ var g=c.genre||c.group||'General'; groups[g]=(groups[g]||0)+1; });
+  var keys = Object.keys(groups).sort();
+  var html = '<button class="ola-group-chip'+(!_oleadaGroup?' active':'')+'" onclick="setOleadaGroup('')">Todos ('+items.length+')</button>';
+  keys.forEach(function(g){
+    html += '<button class="ola-group-chip'+(_oleadaGroup===g?' active':'')+'" onclick="setOleadaGroup(''+g.replace(/'/g,"\'")+'')">' +g+' ('+groups[g]+')</button>';
+  });
+  row.innerHTML = html;
+}
+
+function setOleadaGroup(g){
+  _oleadaGroup = g;
+  document.querySelectorAll('.ola-group-chip').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.ola-group-chip').forEach(function(b){ if(b.textContent.startsWith(g||'Todos')) b.classList.add('active'); });
+  renderOleada();
+}
+
+function renderOleadaList(items){
+  var list = document.getElementById('ola-channel-list');
+  if(!list) return;
+  if(!items.length){
+    list.innerHTML = '<div style="padding:40px 16px;text-align:center;color:var(--text3);font-size:13px;">Sin resultados</div>';
+    return;
+  }
+  list.innerHTML = items.slice(0,200).map(function(item, i){
+    var logo = item.logo
+      ? '<img src="'+item.logo+'" onerror="this.style.display='none';this.nextSibling.style.display='flex'" style="width:100%;height:100%;object-fit:contain;border-radius:6px;"><span style="display:none;font-size:18px;width:100%;height:100%;align-items:center;justify-content:center;">'+item.emoji+'</span>'
+      : '<span style="font-size:18px;">'+item.emoji+'</span>';
+    var isActive = _oleadaActive && _oleadaActive.id===item.id;
+    return '<div class="ola-ch'+(isActive?' active':'')+'" onclick="oleadaPlay(''+item.id+'')" data-id="'+item.id+'">'
+      +'<span class="ola-ch-num">'+(i+1)+'</span>'
+      +'<div class="ola-ch-logo">'+logo+'</div>'
+      +'<div class="ola-ch-info">'
+        +'<div class="ola-ch-name">'+item.title+'</div>'
+        +'<div class="ola-ch-group">'+(item.genre||item.group||'')+'</div>'
+      +'</div>'
+      +(isActive?'<div class="ola-ch-playing"></div>':'')
+    +'</div>';
+  }).join('');
+}
+
+function oleadaPlay(id){
+  var item = (window.allContent||allContent||[]).find(function(c){ return String(c.id)===String(id); });
+  if(!item) return;
+  _oleadaActive = item;
+
+  // Marcar activo en lista
+  document.querySelectorAll('.ola-ch').forEach(function(el){ el.classList.remove('active'); var dot=el.querySelector('.ola-ch-playing'); if(dot)dot.remove(); });
+  var activeEl = document.querySelector('.ola-ch[data-id="'+id+'"]');
+  if(activeEl){ activeEl.classList.add('active'); activeEl.insertAdjacentHTML('beforeend','<div class="ola-ch-playing"></div>'); }
+
+  // Actualizar info
+  document.getElementById('ola-channel-name').textContent = item.title;
+  document.getElementById('ola-info-name').textContent = item.title;
+  document.getElementById('ola-info-meta').textContent = (item.genre||item.group||'')+(item.type==='Canal'?' · 🔴 En vivo':'');
+
+  // Poster
+  var poster = document.getElementById('ola-poster');
+  var posterLogo = document.getElementById('ola-poster-logo');
+  var posterEmoji = document.getElementById('ola-poster-emoji');
+  var posterStatus = document.getElementById('ola-poster-status');
+  poster.style.display='flex';
+  document.getElementById('ola-poster-title').textContent = item.title;
+  posterStatus.textContent = '⏳ Conectando...';
+  if(item.logo){ posterLogo.src=item.logo; posterLogo.style.display=''; posterEmoji.style.display='none'; }
+  else { posterLogo.style.display='none'; posterEmoji.style.display=''; posterEmoji.textContent=item.emoji||'📺'; }
+
+  if(!item.stream){ posterStatus.textContent = '⚠️ Sin stream disponible'; return; }
+
+  // Reproducir
+  var video = document.getElementById('ola-video');
+  if(_oleadaHls){ _oleadaHls.destroy(); _oleadaHls=null; }
+  video.pause(); video.src='';
+
+  function onReady(){ poster.style.display='none'; video.play().catch(function(){}); }
+  function onErr(msg){ posterStatus.textContent='❌ '+(msg||'Error'); }
+
+  if(Hls.isSupported()){
+    _oleadaHls = new Hls({enableWorker:true,lowLatencyMode:true});
+    _oleadaHls.loadSource(item.stream);
+    _oleadaHls.attachMedia(video);
+    _oleadaHls.on(Hls.Events.MANIFEST_PARSED, onReady);
+    _oleadaHls.on(Hls.Events.ERROR, function(e,d){ if(d.fatal) onErr('Stream no disponible'); });
+  } else if(video.canPlayType('application/vnd.apple.mpegurl')){
+    video.src=item.stream;
+    video.addEventListener('loadedmetadata',onReady,{once:true});
+  } else {
+    video.src=item.stream;
+    video.addEventListener('canplay',onReady,{once:true});
+    video.addEventListener('error',function(){ onErr(); },{once:true});
+  }
+}
+
+function oleadaFullscreen(){
+  var v = document.getElementById('ola-video');
+  var w = document.getElementById('ola-video-wrap');
+  if((document.fullscreenElement||document.webkitFullscreenElement)===w){
+    (document.exitFullscreen||document.webkitExitFullscreen).call(document);
+  } else {
+    (w.requestFullscreen||w.webkitRequestFullscreen).call(w);
+  }
+}
+
+function handleSearch(){
+  if(window._currentPage==='catalog') renderOleada();
+}
+// ── FIN OLEADA ENGINE ──────────────────────────────
 
 // ── RENDER PRINCIPAL ─────────────────────────────
 function renderGrid(){
@@ -2721,7 +2906,8 @@ function filterGenre(genre){
 }
 
 function handleSearch(){
-  applyFilters();
+  if(typeof renderOleada==='function' && window._currentPage==='catalog') renderOleada();
+  else applyFilters();
 }
 
 function toggleSort(){
@@ -3956,3 +4142,4 @@ if(document.readyState==='loading'){
 
 </script>
 </body></html>
+
